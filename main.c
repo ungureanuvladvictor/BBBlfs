@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libusb.h>
+#include <linux/ip.h>
+
 #include "bootp.h"
 #include "udp.h"
 
@@ -72,12 +74,15 @@ int main(int argc, const char * argv[]) {
     free(data);
 
     debug_bootp_packet(breq, sizeof(breq));
-    free(breq);*/
+    free(breq);
 
     udp_t *udp = (udp_t *)malloc(sizeof(udp_t));
     make_udp(udp, 30, 67, 68);
-    debug_udp(udp, udp->udpLen);
-
+    debug_udp(udp, udp->udpLen);*/
+    struct iphdr *ip = (struct iphdr*)malloc(sizeof(struct iphdr)+sizeof(bootp_packet)+sizeof(udp_t));
+    make_ipv4(ip,"192.168.0.1","192.168.0.2",17);
+    debug_ipv4(ip);
+    free(ip);
     return 0;
 }
 

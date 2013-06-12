@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include "bootp.h"
 
-void setup_bootp_packet(const char *servername, const char *filename, bootp_packet *bpp) {
+void make_bootp(const char *servername, const char *filename, bootp_packet *bpp) {
     memset(bpp, 0, sizeof(*bpp));
     bpp->opcode = 2;
     bpp->hw = 1;
     bpp->hwlength = 6;
     bpp->hopcount = 255; 
                          
-    bpp->xid = htonl(0);
+    bpp->xid = htonl(1);
     bpp->secs = htons(0);
     bpp->flags = htons(0);
     
@@ -29,7 +29,7 @@ void setup_bootp_packet(const char *servername, const char *filename, bootp_pack
     syslog(LOG_DEBUG, "%ld", sizeof(*bpp));
 }
 
-void debug_bootp_packet(bootp_packet *breq, int breqlen) {
+void debug_bootp(bootp_packet *breq, int breqlen) {
     char vendor[100];
     struct in_addr address;
     u_int8_t *vndptr;

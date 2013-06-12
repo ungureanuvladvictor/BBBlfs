@@ -3,7 +3,7 @@ CFLAGS=-c -Wall
 all: boot
 
 boot: main.o bootp.o udp.o ipv4.o
-	$(CC) -I/usr/include/libusb-1.0 -lusb-1.0 main.o bootp.o udp.o -o bin/boot
+	$(CC) -I/usr/include/libusb-1.0 -lusb-1.0 main.o ipv4.o bootp.o udp.o -o bin/boot
 	rm -rf *o
 
 main.o: main.c

@@ -31,7 +31,7 @@ typedef struct {
     u_int8_t hw; /*!<  */
     u_int8_t hwlength; /*!< Length of the MAC */
     u_int8_t hopcount; /*!< Number of routers to pass until discarded */
-    u_int32_t xid; /*!< Not used */
+    u_int32_t xid; /*!< Transaction ID */
     u_int16_t secs; /*!< Seconds since boot */
     u_int16_t flags; /*!<  */
     ipv4addr ciaddr; /*!< IP address filled by client in REQUEST if known */
@@ -45,5 +45,8 @@ typedef struct {
 } bootp_packet;
 
 typedef u_int8_t hwaddr_t[6];
+
+void make_bootp(const char *servername, const char *filename, bootp_packet *bpp);
+void debug_bootp(bootp_packet *breq, int breqlen);
 
 #endif
