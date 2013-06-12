@@ -7,6 +7,7 @@
 #include "bootp.h"
 #include "udp.h"
 #include "ipv4.h"
+#include "ether2.h"
 
 int main(int argc, const char * argv[]) {
     /*bootp_packet *breq = (bootp_packet *)malloc(sizeof(bootp_packet));
@@ -76,14 +77,25 @@ int main(int argc, const char * argv[]) {
 
     debug_bootp_packet(breq, sizeof(breq));
     free(breq);
+    */
 
     udp_t *udp = (udp_t *)malloc(sizeof(udp_t));
     make_udp(udp, 30, 67, 68);
-    debug_udp(udp, udp->udpLen);*/
+    debug_udp(udp, udp->udpLen);
+    free(udp);
+
     struct iphdr *ip = (struct iphdr*)malloc(sizeof(struct iphdr)+sizeof(bootp_packet)+sizeof(udp_t));
     make_ipv4(ip,"192.168.0.1","192.168.0.2",17);
     debug_ipv4(ip);
     free(ip);
+
+    u_int8_t dst[6] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+    u_int8_t src[6] = {0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c};
+    struct ethhdr *eth2 = (struct ethhdr*)malloc(sizeof(struct ethhdr));
+    make_ether2(eth2, dst, src);
+    debug_ether2(eth2);
+    free(eth2);
+
     return 0;
 }
 
