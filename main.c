@@ -6,6 +6,7 @@
 
 #include "bootp.h"
 #include "udp.h"
+#include "ipv4.h"
 
 int main(int argc, const char * argv[]) {
     /*bootp_packet *breq = (bootp_packet *)malloc(sizeof(bootp_packet));
