@@ -9,3 +9,6 @@ For more information: http://www.google-melange.com/gsoc/proposal/review/google/
 Contact:
 ungureanuvladvictor@gmail.com
 vvu or vvu|Mobile on #beagle, #beagle-gsoc
+
+#Build
+To build the project libusb-1.0-0-dev is needed on the system. A makefile is provided.
