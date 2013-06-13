@@ -26,7 +26,7 @@ static const u_int8_t vendor[] = {
 
 typedef u_int8_t ipv4addr[4];
 
-typedef struct {
+typedef struct bootp {
     u_int8_t opcode; /*!< 1 for BOOTP_REQUEST, 2 for BOOTP_RESPONSE */
     u_int8_t hw; /*!< */
     u_int8_t hwlength; /*!< Length of the MAC */
