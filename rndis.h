@@ -13,7 +13,8 @@ typedef struct {
 	uint32_t out_band_elements; /*!< Not used in this project*/
 	uint32_t packet_offset; /*!< Not used in this project*/
 	uint32_t packet_info_len; /*!< Not used in this project*/
-	uint64_t reserved; /*!< Not used in this project*/
+	uint32_t reserved_first; /*!< Not used in this project*/
+	uint32_t reserved_second; /*!< Not used in this project*/
 } rndis_hdr;
 
 void make_rndis(rndis_hdr *rndishdr, uint32_t data_length);
