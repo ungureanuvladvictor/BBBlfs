@@ -8,6 +8,7 @@
 #include "udp.h"
 #include "ipv4.h"
 #include "ether2.h"
+#include "rndis.h"
 
 int main(int argc, const char * argv[]) {
     /*bootp_packet *breq = (bootp_packet *)malloc(sizeof(bootp_packet));
@@ -95,6 +96,11 @@ int main(int argc, const char * argv[]) {
     make_ether2(eth2, dst, src);
     debug_ether2(eth2);
     free(eth2);
+
+    rndis_hdr *rndis = (rndis_hdr*)malloc(sizeof(rndis));
+    make_rndis(rndis, 10);
+    debug_rndis(rndis);
+    free(rndis);
 
     return 0;
 }
