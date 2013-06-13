@@ -46,7 +46,7 @@ void debug_ipv4(struct iphdr *ip) {
 	syslog(LOG_DEBUG, "STARTING IPV4 LOG");
 	syslog(LOG_DEBUG, "IP Version: %d", ip->version);
 	syslog(LOG_DEBUG, "IP Header Length: %d", ip->ihl);
-	syslog(LOG_DEBUG, "IP Total Length: %d", ip->tot_len);
+	syslog(LOG_DEBUG, "IP Total Length: %d", ntohs(ip->tot_len));
 	syslog(LOG_DEBUG, "IP Protocol: %d", ip->protocol);
 	syslog(LOG_DEBUG, "IP SrcAddr: %s", inet_ntoa(*(struct in_addr*)&ip->saddr));
 	syslog(LOG_DEBUG, "IP DstAddr: %s", inet_ntoa(*(struct in_addr*)&ip->daddr));
