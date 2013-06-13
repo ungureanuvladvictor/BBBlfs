@@ -12,8 +12,8 @@ void make_udp(udp_t *udp_packet, uint16_t udp_len, uint16_t srcPort, uint16_t ds
 	memset(&udp_packet->chkSum, 0, sizeof(udp_packet->chkSum));
 	memset(&udp_packet->udpLen, 0, sizeof(udp_packet->udpLen));
 
-	udp_packet->udpSrc = srcPort;
-	udp_packet->udpDst = dstPort; 
+	udp_packet->udpSrc = htons(srcPort);
+	udp_packet->udpDst = htons(dstPort); 
 
 	udp_packet->udpLen += 8;
 	udp_packet->udpLen += udp_len;

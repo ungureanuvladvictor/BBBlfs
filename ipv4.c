@@ -17,7 +17,7 @@ void make_ipv4(struct iphdr *ip, char *src_addr, char *dst_addr, uint8_t proto) 
 	*/
 	ip->version = 4;
 	ip->ihl = 5;
-	ip->tot_len = (sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet));
+	ip->tot_len = htons((sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet)));
 	ip->protocol = proto;
 	ip->saddr = inet_addr(src_addr);
 	ip->daddr = inet_addr(dst_addr);
