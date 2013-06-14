@@ -19,13 +19,11 @@ void make_ipv4(struct iphdr *ip, char *src_addr, char *dst_addr, uint8_t proto, 
 	ip->protocol = proto;
 	if(inet_aton("192.168.1.9", &ip->saddr) == NULL) {
 		printf("Cannot add IPv4 src address!\n");
-		return 0 ;
 	}
 	if(inet_aton("192.168.1.3", &ip->daddr) == NULL) {
 		printf("Cannot add IPv4 dst address!\n");
-		return 0;
 	}
-	ip->check = ip_checksum((unsigned short *)ip, sizeof(struct iphdr)); 
+	ip->check = ip_checksum(ip, sizeof(struct iphdr)); 
 }
 
 uint16_t ip_checksum(const void *buf, size_t hdr_len) {
