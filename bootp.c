@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include "bootp.h"
 
-void make_bootp(const char *servername, const char *filename, bootp_packet *bpp) {
+void make_bootp(const char *servername, const char *filename, 
+                bootp_packet *bpp) {
     memset(bpp, 0, sizeof(*bpp));
     bpp->opcode = 2;
     bpp->hw = 1;
@@ -16,17 +17,14 @@ void make_bootp(const char *servername, const char *filename, bootp_packet *bpp)
     bpp->secs = htons(0);
     bpp->flags = htons(0);
     
-    memcpy(&bpp->ciaddr, &your_ip, 4);
-    memcpy(&bpp->hwaddr, &BBB_hwaddr, 6);
-    memcpy(&bpp->yiaddr, &your_ip, 4);
-    memcpy(&bpp->server_ip, &BBB_ip, 4);
-    memcpy(&bpp->bootp_gw_ip, &gateway, 4);
+    memcpy(bpp->yiaddr, BBB_ip, 4);
+    memcpy(bpp->server_ip, server_ip, 4);
+    memcpy(bpp->hwaddr, BBB_hwaddr, 6);
     
     strncpy((char *)&bpp->servername, servername, sizeof(bpp->servername));
     strncpy((char *)&bpp->bootfile, filename, sizeof(bpp->bootfile));
 
     memcpy(&bpp->vendor, vendor, 11);
-    syslog(LOG_DEBUG, "%ld", sizeof(*bpp));
 }
 
 void debug_bootp(bootp_packet *breq, int breqlen) {
@@ -64,8 +62,11 @@ void debug_bootp(bootp_packet *breq, int breqlen) {
     syslog (LOG_DEBUG, "bootfile: %s", breq->bootfile);
     
     vndptr = breq->vendor;
-    sprintf (vendor, "Magic cookie:%d.%d.%d.%d ID: %d Length %d Subnet: %d.%d.%d.%d END: 0x%2X", 
-        *vndptr, *(vndptr + 1), *(vndptr + 2), *(vndptr + 3), *(vndptr + 4), *(vndptr + 5), *(vndptr + 6), *(vndptr + 7), *(vndptr + 8), *(vndptr + 9), *(vndptr + 10));
+    sprintf (vendor, "Magic cookie:%d.%d.%d.%d \
+        ID: %d Length %d Subnet: %d.%d.%d.%d END: 0x%2X", 
+        *vndptr, *(vndptr + 1), *(vndptr + 2), *(vndptr + 3), *(vndptr + 4),
+         *(vndptr + 5), *(vndptr + 6), *(vndptr + 7), *(vndptr + 8),
+          *(vndptr + 9), *(vndptr + 10));
     
     syslog (LOG_DEBUG, "vendor: %s", vendor);
     syslog(LOG_DEBUG, "END DEBUG!");
