@@ -10,13 +10,15 @@
 
 uint16_t ip_checksum(const void *buf, size_t hdr_len);
 
-void make_ipv4(struct iphdr *ip, char *src_addr, char *dst_addr, uint8_t proto) {
+void make_ipv4(struct iphdr *ip, char *src_addr, char *dst_addr, uint8_t proto, uint16_t id) {
 	/*char *packet;
 	packet = (char*)malloc( sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet));
 	ip = (struct iphdr*) packet;
 	*/
 	ip->version = 4;
 	ip->ihl = 5;
+	ip->ttl = 64;
+	ip->id = id;
 	ip->tot_len = htons((sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet)));
 	ip->protocol = proto;
 	ip->saddr = inet_addr(src_addr);
@@ -46,8 +48,10 @@ void debug_ipv4(struct iphdr *ip) {
 	syslog(LOG_DEBUG, "STARTING IPV4 LOG");
 	syslog(LOG_DEBUG, "IP Version: %d", ip->version);
 	syslog(LOG_DEBUG, "IP Header Length: %d", ip->ihl);
+	syslog(LOG_DEBUG, "IP ID: %d", ip->id);
 	syslog(LOG_DEBUG, "IP Total Length: %d", ntohs(ip->tot_len));
 	syslog(LOG_DEBUG, "IP Protocol: %d", ip->protocol);
+	syslog(LOG_DEBUG, "IP TTL: %d", ip->ttl);
 	syslog(LOG_DEBUG, "IP SrcAddr: %s", inet_ntoa(*(struct in_addr*)&ip->saddr));
 	syslog(LOG_DEBUG, "IP DstAddr: %s", inet_ntoa(*(struct in_addr*)&ip->daddr));
 	syslog(LOG_DEBUG, "IP CheckSum: %dd", ip->check);
