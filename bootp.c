@@ -11,7 +11,7 @@ void make_bootp(const char *servername, const char *filename,
     bpp->opcode = 2;
     bpp->hw = 1;
     bpp->hwlength = 6;
-    bpp->hopcount = 255; 
+    bpp->hopcount = 0; 
                          
     bpp->xid = htonl(1);
     bpp->secs = htons(0);
