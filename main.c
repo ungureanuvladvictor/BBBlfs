@@ -79,16 +79,10 @@ int main(int argc, const char * argv[]) {
     struct ethhdr *ether = (struct ethhdr*)calloc(1, sizeof(struct ethhdr));
     memcpy(ether->h_dest, BBB_hwaddr, 6);
     memcpy(ether->h_source, my_hwaddr, 6);
-    ether->h_proto = ETH_P_IP;
+    ether->h_proto = htons(0x0800);
 
-    rndis_hdr *receivedRndis = (rndis_hdr*)buffer;
-
-    hexDump("RNDIS Received", receivedRndis, rndisSize);
-    debug_rndis(receivedRndis);
     rndis_hdr *rndis = (rndis_hdr*)calloc(1, sizeof(rndis_hdr));
     make_rndis(rndis, fullSize - sizeof(rndis_hdr));
-    debug_rndis(rndis);
-    hexDump("RNDIS", rndis, rndisSize);
     
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, ether, etherSize);
@@ -96,13 +90,15 @@ int main(int argc, const char * argv[]) {
     memcpy(data + rndisSize + etherSize + ipSize, udp, udpSize);
     memcpy(data + rndisSize + etherSize + ipSize + udpSize, breq, bootpSize);
     
-    /*r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT), 
+    hexDump("Data", data, fullSize);
+
+    r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT), 
                                 data, fullSize, &actual, 0);
 
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                                 buffer, 450, &actual, 0);
     printf("%d\n", actual);
-    hexDump("After sending", buffer, actual);*/
+    hexDump("After sending", buffer, actual);
 
     r = libusb_release_interface(dev_handle, 1); 
     if(r!=0) {
@@ -121,53 +117,3 @@ int main(int argc, const char * argv[]) {
 
     return 0;
 }
-/*
-struct ethhdr *eth2 = calloc(1, sizeof(struct ethhdr));
-    eth2 = (struct ethhdr*)(data + sizeof(rndis_hdr));
-       
-    struct iphdr *ip = calloc(1, sizeof(struct iphdr));
-    ip = (struct iphdr*)(data + sizeof(rndis_hdr) + sizeof(struct ethhdr));
-       
-    udp_t *udp = calloc(1, sizeof(udp_t));
-    udp = (udp_t*)(data + sizeof(rndis_hdr) + sizeof(struct ethhdr) 
-                        + sizeof(struct iphdr));
-        
-    bootp_packet *bootp = calloc(1, sizeof(bootp_packet));
-    bootp = (bootp_packet*)(data + sizeof(rndis_hdr) + sizeof(struct ethhdr)
-                                + sizeof(struct iphdr) + sizeof(udp_t));
-        
-    bootp_packet *response = (bootp_packet*)malloc(sizeof(bootp_packet));
-    make_bootp(servername, filename, response);
-    memcpy(&response->hwaddr, &bootp->hwaddr, 6);
-       
-    udp_t *udp_answer = (udp_t*)malloc(sizeof(udp_t));
-    make_udp(udp_answer, sizeof(bootp_packet), udp->udpDst, udp->udpSrc);
-       
-    struct iphdr *ip_answer = (struct iphdr*)calloc(1, sizeof(struct iphdr) 
-                                + sizeof(udp_t) + sizeof(bootp_packet));
-    make_ipv4(ip_answer, "255.255.255.0", "0.0.0.0", 17, ip->id);
-        
-    unsigned char srcHwAddr[] = {0xc8, 0xbc, 0xc8, 0xe3, 0x5b, 0xac};
-    struct ethhdr *eth_answer = (struct ethhdr*)calloc(1, sizeof(struct ethhdr));
-    memcpy(&eth_answer->h_source, &srcHwAddr, 6);
-    memcpy(&eth_answer->h_dest, &eth2->h_source, 6);
-    eth_answer->h_proto = ETH_P_IP;
-        
-    rndis_hdr *rndis_answer = (rndis_hdr*)calloc(1, sizeof(rndis_hdr) 
-        + sizeof(struct ethhdr) + sizeof(struct iphdr) 
-        + sizeof(udp_t) + sizeof(bootp_packet));
-    make_rndis(rndis_answer, sizeof(struct ethhdr) 
-        + sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet));
-    
-    unsigned char* dump = (unsigned char*)malloc(800*sizeof(unsigned char));
-    memcpy(dump, rndis_answer, sizeof(rndis_hdr));
-    memcpy((dump+sizeof(rndis_hdr)), eth_answer, sizeof(struct ethhdr));
-    memcpy(dump + sizeof(rndis_hdr) + sizeof(struct ethhdr), ip_answer, 
-            sizeof(struct iphdr));
-    memcpy(dump + sizeof(rndis_hdr) + sizeof(struct ethhdr) 
-            + sizeof(struct iphdr), udp_answer, sizeof(udp_t));
-    memcpy(dump + sizeof(rndis_hdr) + sizeof(struct ethhdr) 
-        + sizeof(struct iphdr) + sizeof(udp_t), response, sizeof(bootp_packet));
-    hexDump("Packet", dump, 384);
-
-*/
