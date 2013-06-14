@@ -5,9 +5,9 @@
 
 #include "ether2.h"
 
-void make_ether2(struct ethhdr *eth2, u_int8_t dstAddr[], u_int8_t srcAddr[]) {
-	memcpy(&eth2->h_dest, &dstAddr, 6);
-	memcpy(&eth2->h_source, &srcAddr, 6);
+void make_ether2(struct ethhdr *eth2, unsigned char	*h_dest, unsigned char *h_source) {
+	memcpy(&eth2->h_dest, &h_dest, 6);
+	memcpy(&eth2->h_source, &h_source, 6);
 	eth2->h_proto = ETH_P_IP;
 }
 
