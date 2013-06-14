@@ -4,24 +4,17 @@
 
 #include <sys/types.h>
 
-#define BOOTP_OPTION_NETMASK		1
-#define BOOTP_OPTION_GATEWAY		3
-#define BOOTP_OPTION_DNS		    6
-#define BOOTP_OPTION_HOSTNAME		12
-#define BOOTP_OPTION_DOMAIN		    15
+static const u_int8_t server_ip[4] = {192, 168, 1, 9};
+static const u_int8_t BBB_ip[4] = { 192, 168, 1, 3 };
+static const u_int8_t BBB_hwaddr[6] = { 0xc8, 0xa0, 0x30, 0xa7, 0xd0, 0xfc};
+static const u_int8_t my_hwaddr[6] = { 0x9a, 0x1f, 0x85, 0x1c, 0x3d, 0x0e};
 
-static const u_int8_t gateway[4] = { 192, 168, 0, 1 };
-static const u_int8_t your_ip[4] = { 192, 168, 0, 2 };
-static const u_int8_t BBB_ip[4] = { 192, 168, 0, 3 };
-static const u_int8_t BBB_hwaddr[6] = {0xc8, 0xa0, 0x30, 0xa7, 0xd0, 0xfc};
-static const u_int8_t magic_cookie[4] = { 99, 130, 83, 99 };
-
-static const char servername[4] = {'v', 'v', 'u', '\0' };
-static const char filename[4] = {'M', 'L', 'O', '\0' };
+static const char servername[6] = {'c', 'r', 'o', 's', 's', '\0' };
+static const char filename[19] = {'/', 'h', 'o', 'm', 'e', '/', 'v', 'v', 'u', '/', 'b', 'o', 'o', 't', '/', 'M', 'L', 'O', '\0' };
 
 static const u_int8_t vendor[] = {
     99, 130, 83, 99,
-    BOOTP_OPTION_NETMASK,  4, 255, 255, 255, 0, 0xFF
+    1,  4, 255, 255, 255, 0, 0xFF
 };
 
 typedef u_int8_t ipv4addr[4];
@@ -46,7 +39,8 @@ typedef struct bootp {
 
 typedef u_int8_t hwaddr_t[6];
 
-void make_bootp(const char *servername, const char *filename, bootp_packet *bpp);
+void make_bootp(const char *servername, const char *filename, 
+                bootp_packet *bpp);
 void debug_bootp(bootp_packet *breq, int breqlen);
 
 #endif
