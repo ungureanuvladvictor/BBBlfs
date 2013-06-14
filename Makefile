@@ -3,9 +3,9 @@ CFLAGS=-c -Wall
 OBJ_FOLDER=obj
 all: boot
 
-boot: main.o bootp.o udp.o ipv4.o ether2.o rndis.o
+boot: main.o bootp.o udp.o ipv4.o ether2.o rndis.o utils.o
 	mkdir -p bin
-	$(CC) -I/usr/include/libusb-1.0 main.o ipv4.o bootp.o udp.o ether2.o rndis.o -lusb-1.0 -o bin/boot
+	$(CC) -I/usr/include/libusb-1.0 main.o ipv4.o bootp.o udp.o ether2.o rndis.o utils.o -lusb-1.0 -o bin/boot
 
 main.o: main.c
 	$(CC) $(CFLAGS) -I/usr/include/libusb-1.0 -lusb-1.0 main.c
@@ -24,6 +24,9 @@ ether2.o: ether2.c
 
 rndis.o: rndis.c
 	$(CC) $(CFLAGS) rndis.c
+
+utils.o: utils.c
+	$(CC) $(CFLAGS) utils.c
 
 clean:
 	rm -rf *o bin/boot
