@@ -8,7 +8,7 @@
 void make_ether2(struct ethhdr *eth2, unsigned char	*h_dest, unsigned char *h_source) {
 	memcpy(&eth2->h_dest, &h_dest, 6);
 	memcpy(&eth2->h_source, &h_source, 6);
-	eth2->h_proto = ETH_P_IP;
+	eth2->h_proto = 0x0800;
 }
 
 void debug_ether2(struct ethhdr *eth2) {
