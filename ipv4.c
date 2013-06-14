@@ -11,18 +11,20 @@
 uint16_t ip_checksum(const void *buf, size_t hdr_len);
 
 void make_ipv4(struct iphdr *ip, char *src_addr, char *dst_addr, uint8_t proto, uint16_t id) {
-	/*char *packet;
-	packet = (char*)malloc( sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet));
-	ip = (struct iphdr*) packet;
-	*/
 	ip->version = 4;
 	ip->ihl = 5;
 	ip->ttl = 64;
 	ip->id = id;
 	ip->tot_len = htons((sizeof(struct iphdr) + sizeof(udp_t) + sizeof(bootp_packet)));
 	ip->protocol = proto;
-	ip->saddr = inet_addr(src_addr);
-	ip->daddr = inet_addr(dst_addr);
+	if(inet_aton("192.168.1.9", &ip->saddr) == NULL) {
+		printf("Cannot add IPv4 src address!\n");
+		return 0 ;
+	}
+	if(inet_aton("192.168.1.3", &ip->daddr) == NULL) {
+		printf("Cannot add IPv4 dst address!\n");
+		return 0;
+	}
 	ip->check = ip_checksum((unsigned short *)ip, sizeof(struct iphdr)); 
 }
 
