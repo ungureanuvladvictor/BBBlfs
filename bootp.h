@@ -11,10 +11,12 @@ static const u_int8_t my_hwaddr[6] = { 0x9a, 0x1f, 0x85, 0x1c, 0x3d, 0x0e};
 
 static const char servername[6] = {'c', 'r', 'o', 's', 's', '\0' };
 static const char filename[19] = {'/', 'h', 'o', 'm', 'e', '/', 'v', 'v', 'u', '/', 'b', 'o', 'o', 't', '/', 'M', 'L', 'O', '\0' };
+static const char uboot[21] = {'/', 'h', 'o', 'm', 'e', '/', 'v', 'v', 'u', '/', 'b', 'o', 'o', 't', '/', 'u', 'b', 'o', 'o', 't', '\0' };
 
 static const u_int8_t vendor[] = {
     99, 130, 83, 99,
-    1,  4, 255, 255, 255, 0, 0xFF
+    1, 4, 255, 255, 255, 0, 
+    3, 4, 192, 168, 1, 9, 0xFF
 };
 
 typedef u_int8_t ipv4addr[4];

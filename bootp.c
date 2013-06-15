@@ -19,12 +19,13 @@ void make_bootp(const char *servername, const char *filename,
     
     memcpy(bpp->yiaddr, BBB_ip, 4);
     memcpy(bpp->server_ip, server_ip, 4);
+    memcpy(bpp->bootp_gw_ip, server_ip, 4);
     memcpy(bpp->hwaddr, BBB_hwaddr, 6);
     
     strncpy((char *)&bpp->servername, servername, sizeof(bpp->servername));
     strncpy((char *)&bpp->bootfile, filename, sizeof(bpp->bootfile));
 
-    memcpy(&bpp->vendor, vendor, 11);
+    memcpy(&bpp->vendor, vendor, 17);
 }
 
 void debug_bootp(bootp_packet *breq, int breqlen) {
