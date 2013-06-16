@@ -3,17 +3,19 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
+
 #include "bootp.h"
+#include "utils.h"
 
 void make_bootp(const char *servername, const char *filename, 
-                bootp_packet *bpp) {
-    memset(bpp, 0, sizeof(*bpp));
+                bootp_packet *bpp, u_int32_t xid) {
     bpp->opcode = 2;
     bpp->hw = 1;
     bpp->hwlength = 6;
     bpp->hopcount = 0; 
                          
-    bpp->xid = htonl(1);
+    bpp->xid = htonl(xid);
     bpp->secs = htons(0);
     bpp->flags = htons(0);
     

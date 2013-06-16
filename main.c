@@ -19,7 +19,9 @@
 int main(int argc, const char * argv[]) {
     int actual;
     
-    ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) + sizeof(struct iphdr) + sizeof(struct ethhdr) + sizeof(rndis_hdr);
+    ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) + 
+                       sizeof(struct iphdr) + sizeof(struct ethhdr) + 
+                       sizeof(rndis_hdr);
     ssize_t rndisSize = sizeof(rndis_hdr);
     ssize_t etherSize = sizeof(struct ethhdr);
     ssize_t arpSize = sizeof(arp_hdr);
@@ -50,7 +52,7 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
 
-    dev_handle = libusb_open_device_with_vid_pid(ctx, 0x0451, 0x6141);
+    dev_handle = libusb_open_device_with_vid_pid(ctx, ROMVID, ROMPID);
     if(dev_handle == NULL) {
         printf("Cannot open device!\n");
         return 1;
@@ -69,18 +71,18 @@ int main(int argc, const char * argv[]) {
     }
     
     bootp_packet *breq = (bootp_packet*)calloc(1, bootpSize);
-    make_bootp(servername, filename, breq);
+    make_bootp(servername, filename, breq, 1);
     
     udp_t *udp = (udp_t*)calloc(1, udpSize);
-    make_udp(udp, bootpSize, 67, 68);
+    make_udp(udp, bootpSize, BOOTPS, BOOTPC);
     
     struct iphdr *ip = (struct iphdr*)calloc(1, ipSize);
-    make_ipv4(ip, server_ip, BBB_ip, 17, 0, ipSize + udpSize + bootpSize);
+    make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize + bootpSize);
     
     struct ethhdr *ether = (struct ethhdr*)calloc(1, etherSize);
     memcpy(ether->h_dest, BBB_hwaddr, 6);
     memcpy(ether->h_source, my_hwaddr, 6);
-    ether->h_proto = htons(0x0800);
+    ether->h_proto = htons(ETHIPP);
 
     rndis_hdr *rndis = (rndis_hdr*)calloc(1, rndisSize);
     make_rndis(rndis, fullSize - rndisSize);
@@ -101,59 +103,60 @@ int main(int argc, const char * argv[]) {
 
     arp_hdr *arpResponse = (arp_hdr*)calloc(1, arpSize);
 
-    make_arp(arpResponse, 2, my_hwaddr, &receivedArp->ip_dest, &receivedArp->hw_source, &receivedArp->ip_source);
+    make_arp(arpResponse, 2, my_hwaddr, &receivedArp->ip_dest, 
+             &receivedArp->hw_source, &receivedArp->ip_source);
 
     memset(data, 0, fullSize);
 
     make_rndis(rndis, etherSize + arpSize);
-    ether->h_proto = htons(0x0806);
+    ether->h_proto = htons(ETHARPP);
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, ether, etherSize);
     memcpy(data + rndisSize + etherSize, arpResponse, arpSize);
 
     r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT), 
-                                data, rndisSize + etherSize + arpSize, &actual, 0);
+                                data, rndisSize + etherSize 
+                                + arpSize, &actual, 0);
 
     memset(buffer, 0, 450);
+
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                                 buffer, 450, &actual, 0);
 
+    udp_t *udpSPL = buffer + rndisSize + etherSize + ipSize;
     tftp_data *tftp = (tftp_data*)calloc(1, sizeof(tftp_data));
+    ether->h_proto = htons(ETHIPP);
     int blk_number = 1;
     FILE *send;
-    send = fopen("/home/vvu/boot/MLO" , "rb");
+    send = fopen("/home/vvu/boot/MLO" ,"rb");
     char *reader = (char*)malloc(512 * sizeof(char));
-    
+
     while(!feof(send)) {
         memset(reader, 0, 512);
-        int result = fread(reader, sizeof(char), 512, send);
-        make_tftp_data(tftp, 3, blk_number);
-        
         memset(data, 0, fullSize);
-        
         memset(rndis, 0, rndisSize);
-        make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
-
-        memset(ether, 0, etherSize);
-        memcpy(ether->h_dest, BBB_hwaddr, 6);
-        memcpy(ether->h_source, my_hwaddr, 6);
-        ether->h_proto = htons(0x0800);
-
         memset(ip, 0, ipSize);
-        make_ipv4(ip, server_ip, BBB_ip, 17, 0, ipSize + udpSize + tftpSize + result);
-
         memset(udp, 0, udpSize);
-        make_udp(udp, tftpSize + result, 45861, 1234);
-
+        int result = fread(reader, sizeof(char), 512, send);
+        
+        make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
+        make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize + 
+                  tftpSize + result);
+        make_udp(udp, tftpSize + result, ntohs(udpSPL->udpDst), 
+                 ntohs(udpSPL->udpSrc));
+        make_tftp_data(tftp, 3, blk_number);
+            
         memcpy(data, rndis, rndisSize);
         memcpy(data + rndisSize, ether, etherSize);
         memcpy(data + rndisSize + etherSize, ip, ipSize);
         memcpy(data + rndisSize + etherSize + ipSize, udp, udpSize);
         memcpy(data + rndisSize + etherSize + ipSize + udpSize, tftp, tftpSize);
-        memcpy(data + rndisSize + etherSize + ipSize + udpSize + tftpSize, reader, result);
+        memcpy(data + rndisSize + etherSize + ipSize + udpSize + 
+               tftpSize, reader, result);
 
         r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT), 
-                                data, rndisSize + etherSize + ipSize + udpSize + tftpSize + result, &actual, 0);
+                                data, rndisSize + etherSize + ipSize + 
+                                udpSize + tftpSize + result, &actual, 0);
 
         memset(buffer, 0, 450);
         
@@ -162,17 +165,9 @@ int main(int argc, const char * argv[]) {
         
         blk_number++;
     }
+
     fclose(send);
-    r = libusb_release_interface(dev_handle, 1); 
 
-    if(r!=0) {
-        printf("Cannot release interface!\n");
-        return 1;
-    }
-
-    libusb_close(dev_handle); 
-    libusb_exit(ctx);
-    
     sleep(1);
     
     r = libusb_init(&ctx);
@@ -187,7 +182,7 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
 
-    dev_handle = libusb_open_device_with_vid_pid(ctx, 0x525, 0xA4A2);
+    dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);
     if(dev_handle == NULL) {
         printf("Cannot open device!\n");
         return 1;
@@ -199,7 +194,9 @@ int main(int argc, const char * argv[]) {
         if(libusb_detach_kernel_driver(dev_handle, 0) == 0)
             printf("Kernel deattached!\n");
     }
+
     r = libusb_claim_interface(dev_handle, 1);
+    
     memset(buffer, 0, 450);
     memset(data, 0, 1000);
     memset(rndis, 0, rndisSize);
@@ -211,17 +208,17 @@ int main(int argc, const char * argv[]) {
     
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                             buffer, 450, &actual, 0);
-    bootp_packet *myBoot = buffer + rndisSize + etherSize + ipSize + udpSize;
     
-    make_bootp(servername, uboot, breq);
-    breq->xid = myBoot->xid;
-    make_udp(udp, bootpSize, 67, 68);
-    make_ipv4(ip, server_ip, BBB_ip, 17, 0, ipSize + udpSize + bootpSize);
-    
-    memcpy(ether->h_dest, BBB_hwaddr, 6);
-    memcpy(ether->h_source, my_hwaddr, 6);
-    ether->h_proto = htons(0x0800);
     make_rndis(rndis, fullSize - rndisSize);
+    ether->h_proto = htons(ETHIPP);
+    make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize + bootpSize);
+    make_udp(udp, bootpSize, 
+             ntohs(((udp_t*)(buffer + rndisSize + etherSize + ipSize))->udpDst),
+             ntohs(((udp_t*)(buffer + rndisSize + etherSize + ipSize))->udpSrc));
+    make_bootp(servername, uboot, breq, 
+               ntohl(((bootp_packet*)(buffer + rndisSize + etherSize +
+                ipSize + udpSize))->xid));
+    
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, ether, etherSize);
     memcpy(data + rndisSize + etherSize, ip, ipSize);
@@ -234,57 +231,56 @@ int main(int argc, const char * argv[]) {
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                             buffer, 450, &actual, 0);
     
-    ether->h_proto = htons(0x0806);
     memset(data, 0 , fullSize);
     memset(rndis, 0, rndisSize);
+    
     make_rndis(rndis, etherSize + arpSize);
+    ether->h_proto = htons(ETHARPP);
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, ether, etherSize);
     memcpy(data +rndisSize + etherSize, arpResponse, arpSize);
 
     r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT), 
                             data, rndisSize + etherSize +arpSize, &actual, 0);
+    
     memset(buffer, 0, 450);
     
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                         buffer, 450, &actual, 0);
     
     udp_t *received = buffer + rndisSize + etherSize + ipSize;
-    
+    ether->h_proto = htons(ETHIPP);
+
     blk_number = 1;
     send = fopen("/home/vvu/boot/uboot", "rb");
     memset(reader, 0, 512);
     
     while(!feof(send)) {
-    	memset(reader, 0, 512);
+    	memset(data, 0, fullSize);
+        memset(rndis, 0, rndisSize);
+        memset(ip, 0, ipSize);
+        memset(udp, 0, udpSize);
+
         int result = fread(reader, sizeof(char), 512, send);
+        
+        make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
+        make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize + 
+                  tftpSize + result);
+        make_udp(udp, tftpSize + result, ntohs(received->udpDst), 
+                 ntohs(received->udpSrc));
         make_tftp_data(tftp, 3, blk_number);
         
-        memset(data, 0, fullSize);
-        
-        memset(rndis, 0, rndisSize);
-        make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
-
-        memset(ether, 0, etherSize);
-        memcpy(ether->h_dest, BBB_hwaddr, 6);
-        memcpy(ether->h_source, my_hwaddr, 6);
-        ether->h_proto = htons(0x0800);
-
-        memset(ip, 0, ipSize);
-        make_ipv4(ip, server_ip, BBB_ip, 17, 0, ipSize + udpSize + tftpSize + result);
-
-        memset(udp, 0, udpSize);
-        make_udp(udp, tftpSize + result, 69, ntohs(received->udpSrc));
-
         memcpy(data, rndis, rndisSize);
         memcpy(data + rndisSize, ether, etherSize);
         memcpy(data + rndisSize + etherSize, ip, ipSize);
         memcpy(data + rndisSize + etherSize + ipSize, udp, udpSize);
         memcpy(data + rndisSize + etherSize + ipSize + udpSize, tftp, tftpSize);
-        memcpy(data + rndisSize + etherSize + ipSize + udpSize + tftpSize, reader, result);
+        memcpy(data + rndisSize + etherSize + ipSize + udpSize + 
+               tftpSize, reader, result);
        
         r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT), 
-                                data, rndisSize + etherSize + ipSize + udpSize + tftpSize + result, &actual, 0);
+                                data, rndisSize + etherSize + ipSize + 
+                                udpSize + tftpSize + result, &actual, 0);
         
         memset(buffer, 0, 450);
         
