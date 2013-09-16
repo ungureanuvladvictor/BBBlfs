@@ -7,7 +7,7 @@
 #include "arp.h"
 
 
-void make_arp(arp_hdr *arp, uint16_t opcode, uint8_t hw_source[6], char *ip_source, uint8_t hw_dest[6], char *ip_dest) {
+void make_arp(arp_hdr *arp, uint16_t opcode, const uint8_t hw_source[6], const uint32_t *ip_source, const uint8_t *hw_dest, const uint32_t *ip_dest) {
 	arp->htype = htons(1);
 	arp->ptype = htons(0x0800);
 	arp->hlen = 6;
@@ -19,7 +19,7 @@ void make_arp(arp_hdr *arp, uint16_t opcode, uint8_t hw_source[6], char *ip_sour
 	memcpy(&arp->ip_dest, ip_dest, 4);
 }
 
-void debug_arp(arp_hdr *arp) {
+/*void debug_arp(arp_hdr *arp) {
 	syslog(LOG_DEBUG, "STARTING ARP LOG!");
 	syslog(LOG_DEBUG, "ARP htype: %d", ntohs(arp->htype));
 	syslog(LOG_DEBUG, "APR ptype: %d", ntohs(arp->ptype));
@@ -35,4 +35,4 @@ void debug_arp(arp_hdr *arp) {
         arp->hw_dest[3], arp->hw_dest[4], arp->hw_dest[5]);
 	syslog(LOG_DEBUG, "ARP ip_dest: %s", inet_ntoa(*(struct in_addr*)&arp->ip_dest));
 	syslog(LOG_DEBUG, "END OF ARP LOG!");
-}
+}*/

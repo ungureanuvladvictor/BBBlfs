@@ -10,21 +10,19 @@
 
 uint16_t ip_checksum(const void *buf, size_t hdr_len);
 
-void make_ipv4(struct iphdr *ip, uint8_t src_addr[4], uint8_t dst_addr[4], uint8_t proto, uint16_t id, ssize_t total_len) {
+void make_ipv4(struct iphdr *ip, char *src_addr, char *dst_addr, uint8_t proto, uint16_t id, ssize_t total_len) {
 	ip->version = 4;
 	ip->ihl = 5;
 	ip->ttl = 64;
 	ip->id = htons(id);
 	ip->tot_len = htons(total_len);
 	ip->protocol = proto;
-	if(inet_aton("192.168.1.9", (struct in_addr *)&ip->saddr) == 0) {
+	if(inet_aton(src_addr, (struct in_addr *)&ip->saddr) == 0) {
 		printf("Cannot add IPv4 src address!\n");
 	}
-	if(inet_aton("192.168.1.3", (struct in_addr *)&ip->daddr) == 0) {
+	if(inet_aton(dst_addr, (struct in_addr *)&ip->daddr) == 0) {
 		printf("Cannot add IPv4 dst address!\n");
 	}
-	//memcpy(src_addr, &ip->saddr, 4);
-	//memcpy(dst_addr, &ip->daddr, 4);
 	ip->check = ip_checksum(ip, sizeof(struct iphdr)); 
 }
 

@@ -9,7 +9,7 @@
 #include "utils.h"
 
 void make_bootp(const char *servername, const char *filename, 
-                bootp_packet *bpp, u_int32_t xid) {
+                bootp_packet *bpp, u_int32_t xid, unsigned char *hw_Dest) {
     bpp->opcode = 2;
     bpp->hw = 1;
     bpp->hwlength = 6;
@@ -19,10 +19,10 @@ void make_bootp(const char *servername, const char *filename,
     bpp->secs = htons(0);
     bpp->flags = htons(0);
     
-    memcpy(bpp->yiaddr, BBB_ip, 4);
-    memcpy(bpp->server_ip, server_ip, 4);
+    memcpy(bpp->yiaddr, bootp_BBB_ip, 4);
+    memcpy(bpp->server_ip, bootp_server_ip, 4);
     memcpy(bpp->bootp_gw_ip, server_ip, 4);
-    memcpy(bpp->hwaddr, BBB_hwaddr, 6);
+    memcpy(bpp->hwaddr, hw_Dest, 6);
     
     strncpy((char *)&bpp->servername, servername, sizeof(bpp->servername));
     strncpy((char *)&bpp->bootfile, filename, sizeof(bpp->bootfile));

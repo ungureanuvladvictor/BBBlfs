@@ -2,13 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <arpa/inet.h>
 
 #include "ether2.h"
 
 void make_ether2(struct ethhdr *eth2, unsigned char	*h_dest, unsigned char *h_source) {
-	memcpy(&eth2->h_dest, &h_dest, 6);
-	memcpy(&eth2->h_source, &h_source, 6);
-	eth2->h_proto = 0x0800;
+	memcpy(&eth2->h_dest, h_dest, 6);
+	memcpy(&eth2->h_source, h_source, 6);
+	eth2->h_proto = htons(0x0800);
+}
+
+void update_proto_ether2(struct ethhdr *eth2, uint16_t protocol) {
+	eth2->h_proto = htons(protocol);
 }
 
 void debug_ether2(struct ethhdr *eth2) {

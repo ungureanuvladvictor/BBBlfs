@@ -34,3 +34,9 @@ void hexDump(char *desc, void *addr, int len) {
 
     printf("  %s\n", buff);
 }
+
+const char *get_filename_ext(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}

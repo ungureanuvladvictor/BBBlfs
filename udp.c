@@ -16,7 +16,7 @@ void make_udp(udp_t *udp_packet, uint16_t udp_len,
 	udp_packet->udpSrc = htons(srcPort);
 	udp_packet->udpDst = htons(dstPort); 
 
-	udp_packet->udpLen += htons(8+udp_len);
+	udp_packet->udpLen += htons(8 + udp_len);
 }
 
 void debug_udp(udp_t *udp_packet) {
