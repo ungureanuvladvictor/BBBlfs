@@ -35,8 +35,8 @@
 
 void show_usage() {
     printf("Use like:\nboot emmc/card image\n");
-    printf("emmc / card -- to choose if you want to flash the "\"
-            eMMC or a uSD card\n");
+    printf("emmc / card -- to choose if you want to flash the "\
+            "eMMC or a uSD card\n");
     printf("image -- the name of the image you want to flash."\
             " Needs to be either .xz or .zip format\n");
 }
