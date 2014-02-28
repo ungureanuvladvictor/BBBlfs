@@ -1,5 +1,5 @@
 CC = gcc
-FLAGS = -g -W -Wall -O2 -pthread -lpthread
+FLAGS = -g -W -Wall -O2 -lusb-1.0 -I/usr/include/libusb-1.0
 TARGET = main
 
 SRCFOLDER = src
