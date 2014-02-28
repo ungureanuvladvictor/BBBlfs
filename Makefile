@@ -1,39 +1,26 @@
-CC=gcc
-CFLAGS=-c -Wall
-OBJ_FOLDER=obj
-all: boot
+CC = gcc
+FLAGS = -g -W -Wall -O2 -pthread -lpthread
+TARGET = main
 
-boot: main.o bootp.o udp.o ipv4.o ether2.o rndis.o utils.o arp.o tftp.o
-	mkdir -p bin
-	$(CC) -I/usr/include/libusb-1.0 main.o ipv4.o bootp.o udp.o ether2.o rndis.o utils.o arp.o tftp.o -lusb-1.0 -o bin/boot
+SRCFOLDER = src
+INCFOLDER = includes
+OBJFOLDER = obj
+BINFOLDER = bin
 
-main.o: main.c
-	$(CC) $(CFLAGS) -I/usr/include/libusb-1.0 -lusb-1.0 main.c
+SOURCES = $(wildcard $(SRCFOLDER)/*.c)
+OBJECTS = $(patsubst %.c,$(OBJFOLDER)/%.o,$(notdir $(wildcard $(SRCFOLDER)/*.c)))
 
-bootp.o: bootp.c
-	$(CC) $(CFLAGS) bootp.c
+all: $(OBJECTS)
+	$(CC) $(FLAGS) $(OBJECTS) $(LIBS) -o $(BINFOLDER)/$(TARGET)
 
-udp.o: udp.c
-	$(CC) $(CFLAGS) udp.c
+dirs:
+	@mkdir -p bin src includes obj
 
-ipv4.o: ipv4.c
-	$(CC) $(CFLAGS) ipv4.c
+run: all
+	$(BINFOLDER)/$(TARGET)
 
-ether2.o: ether2.c
-	$(CC) $(CFLAGS) ether2.c
-
-rndis.o: rndis.c
-	$(CC) $(CFLAGS) rndis.c
-
-utils.o: utils.c
-	$(CC) $(CFLAGS) utils.c
-
-arp.o: arp.c
-	$(CC) $(CFLAGS) arp.c
-
-tftp.o: tftp.c
-	$(CC) $(CFLAGS) tftp.c
+$(OBJFOLDER)/%.o: $(SRCFOLDER)/%.c
+	$(CC) $(FLAGS) -c -o $@ $< -I/$(INCFOLDER)
 
 clean:
-	rm -rf *o bin/boot
-	
+	@rm -rf $(OBJFOLDER)/*.o $(BINFOLDER)/$(TARGET)
