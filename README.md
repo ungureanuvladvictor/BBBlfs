@@ -8,6 +8,7 @@ For more information: http://www.google-melange.com/gsoc/proposal/review/google/
 
 #Build
 - sudo apt-get install libusb-1.0-0-dev
+- make dirs
 - make
 
 The binary will be located in the bin folder. The syntax is ./boot emmc / sdcard image.
