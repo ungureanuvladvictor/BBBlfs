@@ -17,7 +17,9 @@ Press the S2 button on the BBB/BBW and apply power to the board. The board shoul
 
 Connect the board to the host PC. The kernel should now identify your board as an RNDIS interface. Be sure you do not have any BOOTP servers on your network.
 
-Run the binary and profit! The binary sends the archived image to the board. While it is sending the image all 4 LEDs will be flashing. After the program quits you can disconnect the USB cable from the Beagle. Once the flashing is done only 2 LEDs will be flashing. Reboot the board and will start with your new OS.
+Go to bin/ and execute runscript.sh. It needs the flashing image as argument to be provided.
+#Usage
+- sudo ./runscript.sh debian.img.xz
 
 If there are bugs please feel free to contact me.
 
