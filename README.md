@@ -11,7 +11,7 @@ For more information: http://www.google-melange.com/gsoc/proposal/review/google/
 - make dirs
 - make
 
-The binary will be located in the bin folder. The syntax is ./boot emmc / sdcard image.
+The binary will be located in the bin folder.
 
 Press the S2 button on the BBB/BBW and apply power to the board. The board should start now into USB boot mode. 
 
