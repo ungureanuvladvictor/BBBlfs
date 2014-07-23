@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Vlad V. Ungureanu <ungureanuvladvictor@gmail.com>.
+ * Copyright 2014 Vlad V. Ungureanu <ungureanuvladvictor@gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this Github repository and wiki except in
@@ -33,14 +33,6 @@
 
 #include "../includes/utils.h"
 
-void show_usage() {
-    printf("Use like:\nboot emmc/card image\n");
-    printf("emmc / card -- to choose if you want to flash the "\
-            "eMMC or a uSD card\n");
-    printf("image -- the name of the image you want to flash."\
-            " Needs to be either .xz or .zip format\n");
-}
-
 int main(int argc, const char * argv[]) {
     int actual;
 
@@ -58,7 +50,6 @@ int main(int argc, const char * argv[]) {
     unsigned char *data = (unsigned char*)calloc(1, 1000);
     unsigned char *buffer = (unsigned char*)malloc(450 * sizeof(unsigned char));
 
-    char *flash_type;
     FILE *send;
 
     libusb_device **devs;
@@ -66,23 +57,6 @@ int main(int argc, const char * argv[]) {
     libusb_context *ctx = NULL;
 
     int r;
-    ssize_t cnt;
-
-    if (argc != 3) {
-        show_usage();
-        exit(1);
-    }
-
-    if (strcmp(argv[1], "emmc") == 0) {
-        flash_type = "nsd";
-    }
-    else if (strcmp(argv[1], "card") == 0) {
-        flash_type = "ysd";
-    }
-    else {
-        show_usage();
-        exit(1);
-    }
 
     r = libusb_init(&ctx);
     if(r < 0) {
@@ -90,17 +64,9 @@ int main(int argc, const char * argv[]) {
         exit(1);
     }
     libusb_set_debug(ctx, 3);
-    cnt = libusb_get_device_list(ctx, &devs);
-    if(cnt < 0) {
-        printf("Cannot get device list!\n");
-        exit(1);
-    }
 
-    dev_handle = libusb_open_device_with_vid_pid(ctx, ROMVID, ROMPID);
-    if(dev_handle == NULL) {
-        printf("Cannot open device!\n");
-        exit(1);
-    }
+    while (libusb_get_device_list(ctx, &devs) > 0 && 
+        (dev_handle = libusb_open_device_with_vid_pid(ctx, ROMVID, ROMPID)) == NULL);
 
     libusb_free_device_list(devs, 1);
     if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
@@ -215,21 +181,24 @@ int main(int argc, const char * argv[]) {
 
     fclose(send);
     libusb_close(dev_handle);
-    sleep(1);
-
-    cnt = libusb_get_device_list(ctx, &devs);
-    if(cnt < 0) {
-        printf("Cannot get device list!\n");
-        exit(1);
-    }
-
+    
+    sleep(1.5);
+    
+    libusb_get_device_list(ctx, &devs); 
     dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);
-    if(dev_handle == NULL) {
-        printf("Cannot open device!\n");
-        exit(1);
-    }
 
+    while (dev_handle == NULL) {
+        libusb_get_device_list(ctx, &devs); 
+        dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);
+    }
+    
+    if (dev_handle == NULL) {
+        printf("Error! Cannot open SPL device!\n");
+        return -1;
+    }
+    
     libusb_free_device_list(devs, 1);
+
     if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
         libusb_detach_kernel_driver(dev_handle, 0);
     }
@@ -338,22 +307,15 @@ int main(int argc, const char * argv[]) {
         printf("Cannot release interface!\n");
         exit(1);
     }
-libusb_close(dev_handle);
-    sleep(5);
+    libusb_close(dev_handle);
+    
+    sleep(3);
 
-    cnt = libusb_get_device_list(ctx, &devs);
-    if(cnt < 0) {
-        printf("Cannot get device list!\n");
-        exit(1);
-    }
-
-    dev_handle = libusb_open_device_with_vid_pid(ctx, UBOOTVID, UBOOTPID);
-    if(dev_handle == NULL) {
-        printf("Cannot open device!\n");
-        exit(1);
-    }
+    while (libusb_get_device_list(ctx, &devs) > 0 && 
+        (dev_handle = libusb_open_device_with_vid_pid(ctx, UBOOTVID, UBOOTPID)) == NULL);
 
     libusb_free_device_list(devs, 1);
+    
     if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
         libusb_detach_kernel_driver(dev_handle, 0);
     }
@@ -421,78 +383,22 @@ libusb_close(dev_handle);
 
         blk_number++;
     }
-    libusb_close(dev_handle);
-
-    sleep(10);
-
-    cnt = libusb_get_device_list(ctx, &devs);
-    if(cnt < 0) {
-        printf("Cannot get device list!\n");
-        exit(1);
-    }
-
-    dev_handle = libusb_open_device_with_vid_pid(ctx, SERIALVID, SERIALPID);
-    if(dev_handle == NULL) {
-        printf("Cannot open device!\n");
-        exit(1);
-    }
-
-    printf(" Kernel has started! Now the image archive is being sent to the board.\n "\
-        "During sending all 4 LEDs will be blinking.\n When flashing is done only 2 LEDs "\
-        "will be blinking.\n");
-
-    libusb_free_device_list(devs, 1);
-    if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
-        libusb_detach_kernel_driver(dev_handle, 0);
-    }
-    r = libusb_claim_interface(dev_handle, 1);
-
-    r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT),
-                                (unsigned char*)flash_type, 3, &actual, 0);
-    r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT),
-                            (unsigned char*)argv[2], 12, &actual, 0);
-
-    send = fopen(argv[2], "rb");
-
-    if (send == NULL) {
-        perror("Something wrong!\n");
-        exit(1);
-    }
-
-    struct stat st;
-    stat(argv[2], &st);
-    int size = st.st_size;
-    memcpy(data, (char*)&size, 4);
-    r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT),
-                            data, 4, &actual, 0);
-    memset(reader, 0, 512);
-    int total=0;
-    free(reader);
-    reader = malloc(4096 * sizeof(char));
-    while(!feof(send)) {
-
-        int result = fread(reader, sizeof(char), 4096, send);
-
-
-        r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT),
-                                (unsigned char*)reader, result, &actual, 0);
-        total+=actual;
-        memset(buffer, 0, 450);
-
-        r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
-                                buffer, 450, &actual, 0);
-    }
-
-    r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
-                            buffer, 450, &actual, 0);
-    sleep(2);
-    r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT),
-                                (unsigned char*)"FIN", 3, &actual, 0);
+    
     libusb_close(dev_handle);
     libusb_exit(ctx);
 
+    /* Freeing used structures */
+    free(rndis);
+    free(ip);
+    free(udp);
+    free(arpResponse);
+    free(breq);
+    free(tftp);
+
+    /* Freeing data buffers */
     free(data);
     free(buffer);
-
+    free(reader);
+    
     return 0;
 }

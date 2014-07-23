@@ -25,7 +25,7 @@
 #define ETHARPP 0x0806
 #define ROMVID 0x0451
 #define ROMPID 0x6141
-#define SPLVID 0x525
+#define SPLVID 0x0525
 #define SPLPID 0xA4A2
 #define UBOOTVID 0x0525
 #define UBOOTPID 0xa4a5
