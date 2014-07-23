@@ -44,6 +44,6 @@ typedef u_int8_t hwaddr_t[6];
 
 void make_bootp(const char *servername, const char *filename,
                 bootp_packet *bpp, u_int32_t xid, unsigned char *hw_Dest);
-void debug_bootp(bootp_packet *breq, int breqlen);
+void debug_bootp(bootp_packet *breq);
 
 #endif
