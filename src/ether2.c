@@ -20,7 +20,7 @@
 #include <syslog.h>
 #include <arpa/inet.h>
 
-#include "../includes/ether2.h"
+#include "ether2.h"
 
 void make_ether2(struct ethhdr *eth2, unsigned char *h_dest,
                     unsigned char *h_source) {

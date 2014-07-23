@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #include <arpa/inet.h>
 
-#include "../includes/tftp.h"
+#include "tftp.h"
 
 void make_tftp_data(tftp_data *tftp, uint16_t opcode, uint16_t blk_number) {
 	tftp->opcode = ntohs(opcode);

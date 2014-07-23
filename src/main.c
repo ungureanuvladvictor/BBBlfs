@@ -22,19 +22,20 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#include "../includes/rndis.h"
-#include "../includes/ether2.h"
-#include "../includes/ipv4.h"
-#include "../includes/udp.h"
-#include "../includes/bootp.h"
-#include "../includes/tftp.h"
+#include "rndis.h"
+#include "ether2.h"
+#include "ipv4.h"
+#include "udp.h"
+#include "bootp.h"
+#include "tftp.h"
 
-#include "../includes/arp.h"
+#include "arp.h"
 
-#include "../includes/utils.h"
+#include "utils.h"
 
 int main(int argc, const char * argv[]) {
     int actual;
+    int result;
 
     ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) +
                        sizeof(struct iphdr) + sizeof(struct ethhdr) +
@@ -150,7 +151,7 @@ int main(int argc, const char * argv[]) {
         memset(rndis, 0, rndisSize);
         memset(ip, 0, ipSize);
         memset(udp, 0, udpSize);
-        int result = fread(reader, sizeof(char), 512, send);
+        result = fread(reader, sizeof(char), 512, send);
 
         make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
         make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
@@ -273,7 +274,7 @@ int main(int argc, const char * argv[]) {
         memset(ip, 0, ipSize);
         memset(udp, 0, udpSize);
 
-        int result = fread(reader, sizeof(char), 512, send);
+        result = fread(reader, sizeof(char), 512, send);
 
         make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
         make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
@@ -356,7 +357,7 @@ int main(int argc, const char * argv[]) {
         memset(ip, 0, ipSize);
         memset(udp, 0, udpSize);
 
-        int result = fread(reader, sizeof(char), 512, send);
+        result = fread(reader, sizeof(char), 512, send);
         make_rndis(rndis, etherSize + ipSize + udpSize + tftpSize + result);
         make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
                   tftpSize + result);

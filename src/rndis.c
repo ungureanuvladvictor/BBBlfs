@@ -18,7 +18,7 @@
 #include <string.h>
 #include <syslog.h>
 
-#include "../includes/rndis.h"
+#include "rndis.h"
 
 void make_rndis(rndis_hdr *rndishdr, uint32_t data_length) {
 	rndishdr->data_len = data_length;

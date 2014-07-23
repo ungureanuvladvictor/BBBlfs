@@ -21,8 +21,8 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
-#include "../includes/udp.h"
-#include "../includes/bootp.h"
+#include "udp.h"
+#include "bootp.h"
 
 uint16_t ip_checksum(const void *buf, size_t hdr_len);
 

@@ -20,7 +20,7 @@
 #include <syslog.h>
 #include <arpa/inet.h>
 
-#include "../includes/arp.h"
+#include "arp.h"
 
 
 void make_arp(arp_hdr *arp, uint16_t opcode, const uint8_t hw_source[6],

@@ -22,7 +22,7 @@
 #include <syslog.h>
 #include <inttypes.h>
 
-#include "../includes/udp.h"
+#include "udp.h"
 
 void make_udp(udp_t *udp_packet, uint16_t udp_len,
 			uint16_t srcPort, uint16_t dstPort) {

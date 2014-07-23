@@ -21,8 +21,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../includes/bootp.h"
-#include "../includes/utils.h"
+#include "bootp.h"
+#include "utils.h"
 
 void make_bootp(const char *servername, const char *filename,
                 bootp_packet *bpp, u_int32_t xid, unsigned char *hw_Dest) {
@@ -46,7 +46,7 @@ void make_bootp(const char *servername, const char *filename,
     memcpy(&bpp->vendor, vendor, 17);
 }
 
-void debug_bootp(bootp_packet *breq, int breqlen) {
+void debug_bootp(bootp_packet *breq) {
     char vendor[100];
     struct in_addr address;
     u_int8_t *vndptr;
