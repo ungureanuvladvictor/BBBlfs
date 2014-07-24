@@ -28,5 +28,6 @@ If there are bugs please feel free to contact me.
 
 #Contact
 vvu@vdev.ro
+
 vvu on #beagle, #beagle-gsoc
 
