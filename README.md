@@ -11,20 +11,22 @@ For more information: http://www.google-melange.com/gsoc/proposal/review/google/
 - make dirs
 - make
 
-The binary will be located in the bin folder.
 
 Press the S2 button on the BBB/BBW and apply power to the board. The board should start now into USB boot mode. 
 
 Connect the board to the host PC. The kernel should now identify your board as an RNDIS interface. Be sure you do not have any BOOTP servers on your network.
 
 Go to bin/ and execute runscript.sh. It needs the flashing image as argument to be provided.
+
+For now only .xz compressed images are supported.
+
 #Usage
-- sudo ./runscript.sh debian.img.xz
+- sudo ./runscript.sh image
 
 If there are bugs please feel free to contact me.
 
 
 #Contact
-ungureanuvladvictor@gmail.com
-vvu or vvu|Mobile on #beagle, #beagle-gsoc
+vvu@vdev.ro
+vvu on #beagle, #beagle-gsoc
 
