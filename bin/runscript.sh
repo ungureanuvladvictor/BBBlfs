@@ -15,10 +15,9 @@ fi
 echo "We are flashing this all mighty BeagleBone Black with the image from $1!"
 echo "Please do not insert any USB Sticks"\
 		"or mount external hdd during the procedure."
-
+echo 
 filename=$(basename "$1")
 extension="${filename##*.}"
-echo $extension
 
 read -p "When the BeagleBone Black is connected in USB Boot mode press 'y'." -n 1 -r
 echo
