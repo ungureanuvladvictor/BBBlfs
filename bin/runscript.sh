@@ -6,6 +6,8 @@ diff(){
        END{for(k in a)if(a[k])print k}' <(echo -n "${!1}") <(echo -n "${!2}")
 }
 
+echo
+
 if [ -z "$1" ];
 then
 	echo "Please provide an image to flash!"
@@ -14,7 +16,7 @@ fi
 
 echo "We are flashing this all mighty BeagleBone Black with the image from $1!"
 echo "Please do not insert any USB Sticks"\
-		"or mount external hdd during the procedure."
+	    "or mount external hdd during the procedure."
 echo 
 filename=$(basename "$1")
 extension="${filename##*.}"
@@ -34,11 +36,13 @@ then
         exit $rc
     fi
 
-    echo "Waiting for the BeagleBone Black to be mounted ..."
-    for i in {1..8}
+    echo -n "Waiting for the BeagleBone Black to be mounted"
+    for i in {1..12}
     do
+        echo -n "."
         sleep 1
     done
+    echo 
 
 	after=($(ls /dev | grep "sd[a-z]$"))
 	bbb=($(diff after[@] before[@]))
@@ -46,8 +50,8 @@ then
 	if [ -z "$bbb" ];
 	then
 		echo "The BeagleBone Black cannot be detected. Either it has not been"\
-                " mounted or the g_mass_storage module failed loading."\
-			    " Please send the serial log over to vvu@vdev.ro for debugging."
+                " mounted or the g_mass_storage module failed loading. "\
+			    "Please send the serial log over to vvu@vdev.ro for debugging."
 		exit
 	fi
 	
