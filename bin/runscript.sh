@@ -6,12 +6,27 @@ diff(){
        END{for(k in a)if(a[k])print k}' <(echo -n "${!1}") <(echo -n "${!2}")
 }
 
+is_file_exists(){
+	local f="$1"
+	[[ -f "$f" ]] && return 0 || return 1
+}
+
+usage(){
+	echo "Usage: $0 image_file"
+	echo "Supported images are just in .img.xz format."
+	exit 1
+}
+
+
 echo
 
-if [ -z "$1" ];
+[[ $# -eq 0 ]] && usage
+
+if ( ! is_file_exists "$1")
 then
-	echo "Please provide an image to flash!"
-	exit
+	echo "Please provide an existing flash file."
+	usage
+	exit 1
 fi
 
 echo "We are flashing this all mighty BeagleBone Black with the image from $1!"
@@ -21,7 +36,7 @@ echo
 filename=$(basename "$1")
 extension="${filename##*.}"
 
-read -p "When the BeagleBone Black is connected in USB Boot mode press 'y'." -n 1 -r
+read -p "When the BeagleBone Black is connected in USB Boot mode press [yY]." -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
@@ -62,7 +77,7 @@ then
 		exit
 	fi
 
-	read -p "Are you sure the BeagleBone Black is mounted at /dev/$bbb? " -n 1 -r
+	read -p "Are you sure the BeagleBone Black is mounted at /dev/$bbb?[yY]" -n 1 -r
 	echo
 
 	if [[ $REPLY =~ ^[Yy]$ ]]
