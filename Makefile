@@ -1,6 +1,7 @@
 CC = gcc
-CFLAGS = -g -W -Wall -O2 -I/usr/include/libusb-1.0
-LIBS = -lusb-1.0
+CFLAGS = -g -W -Wall -O2 
+CFLAGS += `pkg-config --cflags libusb-1.0`
+LIBS += `pkg-config --libs libusb-1.0`
 TARGET = usb_flasher
 
 SRCFOLDER = src
