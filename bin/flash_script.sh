@@ -21,16 +21,17 @@ is_online(){
 }
 
 usage(){
-	echo "Usage: $0 image_file"
+	echo "Usage: $0 [ debian | ubuntu | input.img.xz ]"
 	echo "Supported images are just in .img.xz format."
 	exit 1
 }
 
 echo
+input=$1
 
 if [[ $# -eq 0 ]]
 then
-	read -p "You did not prove an image to flash. Do you want me to download the latest Debian image from beagleboard.org? [yY]" -n 1 -r
+	read -p "You did not provide an image to flash. Do you want me to download the latest Debian image from beagleboard.org? [yY]" -n 1 -r
 	if [[ $REPLY =~ ^[Yy]$ ]]
 	then
 		if ( ! is_online )
@@ -46,20 +47,25 @@ then
 		rm index.html
 		rm latest-images
 		wget -O flash.img.xz $url
-		image_file="flash.img.xz"
+		input="flash.img.xz"
 	fi
 else
-	image_file=$1
+	input=$1
 fi
 
-if ( ! is_file_exists "$image_file")
+if [ ! \( "$input" = "debian" -o "$input" = "ubuntu" \) ]
 then
-	echo "Please provide an existing flash file."
-	usage
-	exit 1
-fi
 
-echo "We are flashing this all mighty BeagleBone Black with the image from $image_file!"
+	if ( ! is_file_exists "$input" )
+	then
+		echo "Please provide an existing flash file."
+		usage
+		exit 1
+	fi
+
+	echo "We are flashing this all mighty BeagleBone Black with the image from $input!"
+
+fi
 echo "Please do not insert any USB Sticks"\
 		"or mount external hdd during the procedure."
 echo 
@@ -80,7 +86,7 @@ then
 	echo "Putting the BeagleBone Black into flashing mode!"
 	echo
 
-	./usb_flasher
+	sudo ./usb_flasher
 	rc=$?
 	if [[ $rc != 0 ]];
 	then
@@ -109,7 +115,7 @@ then
 		exit 1
 	fi
 	
-	if [ ${#bbb[@]} != "1" ];
+	if [ ${#bbb[@]} != "1" ]
 	then
 		echo "You inserted an USB stick or mounted an external drive. Please "\
 			"rerun the script without doing that."
@@ -123,10 +129,16 @@ then
 	then
 		echo "Flashing now, be patient. It will take ~5 minutes!"
 		echo
-		xzcat $image_file | dd of=/dev/$bbb bs=1M
+		if [ \( "$input" = "debian" -o "$input" = "ubuntu" \) ]
+		then
+			sudo ./bbb-armhf.sh $bbb $input
+		else
+			xzcat $input | sudo dd of=/dev/$bbb bs=1M
+			echo
+			echo "Resizing partitons now, just as a saefty measure if you flash 2GB image on 4GB board!"
+			echo -e "d\n2\nn\np\n2\n\n\nw" | sudo fdisk /dev/$bbb > /dev/null
+		fi
 		echo
-		echo "Resizing partitons now, just as a saefty measure if you flash 2GB image on 4GB board!"
-		echo -e "d\n2\nn\np\n2\n\n\nw" | fdisk /dev/$bbb > /dev/null
 		echo "Please remove power from your board and plug it again."\
 				"You will boot in the new OS!"
 	fi
