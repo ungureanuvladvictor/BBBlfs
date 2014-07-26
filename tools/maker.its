@@ -1,0 +1,49 @@
+/*
+ * Simple U-boot uImage source file containing a single kernel and FDT blob
+ */
+ 
+/dts-v1/;
+ 
+/ {
+        description = "Booting from Linux Flash USB!";
+        #address-cells = <1>;
+        images {
+                kernel@1 {
+                        description = "Vanilla Linux kernel";
+			data = /incbin/("zImage");
+                        type = "kernel";
+                        arch = "arm";
+                        os = "linux";
+                        compression = "none";
+                        load = <0x80008000>;
+                        entry = <0x80008000>;
+                };
+                ramdisk@1 {
+                        description = "recovery ramdisk";  
+                        data = /incbin/("ramdisk.cpio.gz");
+                        type = "ramdisk";
+                        arch = "arm";
+                        os = "linux";
+                        compression = "gzip";
+                        load = <0x81000000>;
+                        entry = <0x4000000>;
+                };
+		fdt@1 {
+                        description = "Flattened Device Tree blob";
+                        data = /incbin/("am335x-boneblack.dtb");
+                        type = "flat_dt";
+                        arch = "arm";
+                        compression = "none";
+                };
+        };
+ 
+        configurations {
+                default = "LinuxBoot@1";
+                LinuxBoot@1 {
+                        description = "Booting from Linux";
+                        kernel = "kernel@1";
+                        ramdisk = "ramdisk@1";
+                        fdt = "fdt@1";
+                };
+        };
+};
