@@ -33,7 +33,7 @@
 
 #include "utils.h"
 
-int main(int argc, const char * argv[]) {
+int main(int UNUSED argc, const char UNUSED * argv[]) {
     int actual;
     int result;
 
