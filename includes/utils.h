@@ -17,6 +17,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+/*Used to suppressed the unused warnings*/
+#ifdef __GNUC__
+#define UNUSED __attribute__ ((unused))
+#else
+#define UNUSED
+#endif
+
 #define BOOTPS 67
 #define BOOTPC 68
 #define ROMXID 1
@@ -32,8 +39,8 @@
 #define SERIALVID 0x0525
 #define SERIALPID 0xa4a7
 
-static const char *server_ip = "192.168.1.9";
-static const char *BBB_ip = "192.168.1.3";
+static const char UNUSED *server_ip = "192.168.1.9";
+static const char UNUSED *BBB_ip = "192.168.1.3";
 static const uint8_t bootp_server_ip[4] = { 0xc0, 0xa8, 0x01, 0x09 };
 static const uint8_t bootp_BBB_ip[4] = { 0xc0, 0xa8, 0x01, 0x03 };
 static const uint8_t BBB_hwaddr[6] = { 0xc8, 0xa0, 0x30, 0xa7, 0xd0, 0xfc};

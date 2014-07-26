@@ -1,5 +1,5 @@
 CC = gcc
-FLAGS = -g -W -Wall -O2 -I/usr/include/libusb-1.0
+CFLAGS = -g -W -Wall -O2 -I/usr/include/libusb-1.0
 LIBS = -lusb-1.0
 TARGET = usb_flasher
 
@@ -12,16 +12,14 @@ SOURCES = $(wildcard $(SRCFOLDER)/*.c)
 OBJECTS = $(patsubst %.c,$(OBJFOLDER)/%.o,$(notdir $(wildcard $(SRCFOLDER)/*.c)))
 
 all: $(OBJECTS)
-	$(CC) $(FLAGS) $(OBJECTS) $(LIBS) -o $(BINFOLDER)/$(TARGET)
-
-dirs:
-	@mkdir -p bin src includes obj
+	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) -o $(BINFOLDER)/$(TARGET)
 
 run: all
 	$(BINFOLDER)/$(TARGET)
 
 $(OBJFOLDER)/%.o: $(SRCFOLDER)/%.c
-	$(CC) $(FLAGS) -c -o $@ $< -I$(INCFOLDER)
+	@mkdir -p ${OBJFOLDER}
+	$(CC) $(CFLAGS) -c -o $@ $< -I$(INCFOLDER)
 
 clean:
-	@rm -rf $(OBJFOLDER)/*.o $(BINFOLDER)/$(TARGET)
+	@rm -rf $(OBJFOLDER) $(BINFOLDER)/$(TARGET)

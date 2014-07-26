@@ -7,7 +7,6 @@ This project provides a way to flash a BeagleBone Black via USB from a Linux mac
 
 #Build
 - sudo apt-get install libusb-1.0-0-dev
-- make dirs
 - make
 
 Press the S2 button on the BeagleBone Black  and apply power to the board. The board should start now into USB boot mode. 
