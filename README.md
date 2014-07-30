@@ -5,26 +5,34 @@ Beagle Bone Black Linux Flash System
 
 This project provides a way to flash a BeagleBone Black via USB from a Linux machine. The project is developed during Google Summer of Code '13. 
 
-#Build
-- sudo apt-get install libusb-1.0-0-dev
-- make
+
+Build
+----------
+```
+sudo apt-get install libusb-1.0-0-dev
+make
+```
 
 
-#Usage
-
+Usage
+-----------
 Press the S2 button on the BeagleBone Black and apply power to the board. The board should start now into USB boot mode. 
 
 Connect the board to the host PC. The kernel should now identify your board as an RNDIS interface. Be sure you do not have any BOOTP servers on your network.
 
-Go to bin/ and execute flash_script.sh. It needs the flashing image as argument to be provided.
+Go to bin/ and execute ```flash_script.sh``` It needs the flashing image as argument to be provided.
 
 For now only .xz compressed images are supported.
 
-- sudo ./flash_script.sh image.xz
+```sudo ./flash_script.sh image.xz```
 
 If there are bugs please feel free to contact me.
 
-#How to build the binary blobs
+
+
+How to build the binary blobs
+--------------------------------
+
 The full system works as follow:
 
 * The AM335x ROM when in USB boot mode exposes a RNDIS interface to the PC and waits to TFTP a binary blob that it executes. That binary blob is the SPL
@@ -38,19 +46,25 @@ The full system works as follow:
     * Grab the latest U-Boot sources from [git://git.denx.de/u-boot.git](git://git.denx.de/u-boot.git)
     * Install your favourite cross-compiler, I am using arm-linux-gnueabi-
     * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
-    	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl
+    	* ```make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl```
     * Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
 * ## Building the Kernel
-    * Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
-    	* git checkout 3.14
-    	* ./patch.sh
-    	* cp configs/beaglebone kernel/arch/arm/configs/beaglebone_defconfig
-    	* wget http://arago-project.org/git/projects/?p=am33x-cm3.git\;a=blob_plain\;f=bin/am335x-pm-firmware.bin\;hb=HEAD -O kernel/firmware/am335x-pm-firmware.bin
-    	* cd kernel
-    	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig -j4
-    	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtb modules -j4
-    * After compilation you have in arch/arm/boot/ the zImage
+
+Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
+
+```
+git checkout 3.14
+./patch.sh
+cp configs/beaglebone kernel/arch/arm/configs/beaglebone_defconfig
+wget http://arago-project.org/git/projects/?p=am33x-cm3.git\;a=blob_plain\;f=bin/am335x-pm-firmware.bin\;hb=HEAD -O kernel/firmware/am335x-pm-firmware.bin
+cd kernel
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig -j4
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtb modules -j4
+```
+
+After compilation you have in arch/arm/boot/ the zImage
+
 
 * ## Building the ramdisk
     * Our initramfs will be built around BusyBox. First we create the basic folder structure.
