@@ -20,7 +20,8 @@ Go to bin/ and execute flash_script.sh. It needs the flashing image as argument 
 
 For now only .xz compressed images are supported.
 
-- sudo ./flash_script.sh image.xz
+- sudo ./flash_script.sh [ debian | ubuntu | image.xz ]
+* debian and ubuntu will use tarball from armhf.com website
 
 If there are bugs please feel free to contact me.
 
@@ -39,7 +40,7 @@ The full system works as follow:
     * Install your favourite cross-compiler, I am using arm-linux-gnueabi-
     * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
     	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_defconfig
-    	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl
+	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
     * Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
 * ## Building the Kernel
@@ -50,7 +51,7 @@ The full system works as follow:
     	* wget http://arago-project.org/git/projects/?p=am33x-cm3.git\;a=blob_plain\;f=bin/am335x-pm-firmware.bin\;hb=HEAD -O kernel/firmware/am335x-pm-firmware.bin
     	* cd kernel
     	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig -j4
-    	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtb modules -j4
+	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtbs modules -j4
     * After compilation you have in arch/arm/boot/ the zImage
 
 * ## Building the ramdisk
