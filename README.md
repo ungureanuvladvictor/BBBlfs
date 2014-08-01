@@ -38,6 +38,7 @@ The full system works as follow:
     * Grab the latest U-Boot sources from [git://git.denx.de/u-boot.git](git://git.denx.de/u-boot.git)
     * Install your favourite cross-compiler, I am using arm-linux-gnueabi-
     * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
+    	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_defconfig
     	* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl
     * Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
