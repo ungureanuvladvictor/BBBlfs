@@ -126,7 +126,12 @@ then
 	echo
 
 	if [[ $REPLY =~ ^[Yy]$ ]];
-	then
+		parts=($(ls /dev | grep "$bbb[1,2]"))
+		then
+			for index in ${!parts[*]}
+			do
+				sudo umount /dev/${parts[$index]}
+		done
 		echo "Flashing now, be patient. It will take ~5 minutes!"
 		echo
 		if [ \( "$input" = "debian" -o "$input" = "ubuntu" \) ]
@@ -137,6 +142,8 @@ then
 			echo
 			echo "Resizing partitons now, just as a saefty measure if you flash 2GB image on 4GB board!"
 			echo -e "d\n2\nn\np\n2\n\n\nw" | sudo fdisk /dev/$bbb > /dev/null
+			sudo e2fsck -f /dev/${bbb}2
+			sudo resize2fs /dev/${bbb}2
 		fi
 		echo
 		echo "Please remove power from your board and plug it again."\
