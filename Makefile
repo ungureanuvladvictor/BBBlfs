@@ -3,7 +3,7 @@ CFLAGS = -g -W -Wall -O2
 CFLAGS += `pkg-config --cflags libusb-1.0`
 LIBS += `pkg-config --libs libusb-1.0`
 TARGET = usb_flasher
-CROSS_CC ?= arm-linux-gnueabi-
+CROSS_COMPILE ?= arm-linux-gnueabi-
 
 SRCFOLDER = src
 INCFOLDER = includes
@@ -39,4 +39,4 @@ clean:
 	@rm -rf $(OBJFOLDER) $(BINFOLDER)/$(TARGET) $(BINTESTFOLDER)
 
 print_cross_cc:
-	@echo $(CROSS_CC)
+	@echo $(CROSS_COMPILE)

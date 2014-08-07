@@ -18,8 +18,8 @@ pushd $kernel_source
   cp configs/beaglebone kernel/arch/arm/configs/beaglebone_defconfig
   wget -c http://arago-project.org/git/projects/?p=am33x-cm3.git\;a=blob_plain\;f=bin/am335x-pm-firmware.bin\;hb=HEAD -O kernel/firmware/am335x-pm-firmware.bin
   pushd kernel
-    make ARCH=arm CROSS_COMPILE=$CROSS_CC beaglebone_defconfig -j4
-    make ARCH=arm CROSS_COMPILE=$CROSS_CC zImage dtbs modules -j4
+    make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE beaglebone_defconfig -j4
+    make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE zImage dtbs modules -j4
   popd
 popd
 
@@ -37,12 +37,12 @@ busybox_source=/tmp/busybox
 
 git clone git://git.busybox.net/busybox $busybox_source
 pushd $busybox_source
-  make ARCH=arm CROSS_COMPILE=$CROSS_CC defconfig
-  make ARCH=arm CROSS_COMPILE=$CROSS_CC menuconfig
-  make ARCH=arm CROSS_COMPILE=$CROSS_CC -j4
-  make ARCH=arm CROSS_COMPILE=$CROSS_CC install CONFIG_PREFIX=$ramdisk_source
+  make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE defconfig
+  make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE menuconfig
+  make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE -j4
+  make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE install CONFIG_PREFIX=$ramdisk_source
   pushd $kernel_source/kernel
-    make ARCH=arm CROSS_COMPILE=$CROSS_CC modules_install INSTALL_MOD_PATH=$ramdisk_source
+    make ARCH=arm CROSS_COMPILE=$CROSS_COMPILE modules_install INSTALL_MOD_PATH=$ramdisk_source
   popd
 popd
 

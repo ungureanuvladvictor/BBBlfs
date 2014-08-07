@@ -1,4 +1,7 @@
-export CROSS_CC=$(make -s -f Makefile print_cross_cc)
+echo
+export CROSS_COMPILE=$(make -s -f Makefile print_cross_cc)
+echo The cross compiler is set to $CROSS_COMPILE
+echo
 
 unset deb_pkgs
 
@@ -42,7 +45,3 @@ function install_required_tools() {
 
   aptget_update_install
 }
-
-function build_dev_space() {
-  mkdir -p $1
-}  
