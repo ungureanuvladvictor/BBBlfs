@@ -1,14 +1,14 @@
-From b48a587ba3a0d40b508d150927d00ce3249f34a7 Mon Sep 17 00:00:00 2001
-From: Vlad Victor Ungureanu <vvu@vdev.ro>
-Date: Fri, 1 Aug 2014 17:30:53 +0200
-Subject: [PATCH 1/2] Modified PID for SPL and U-Boot
+From 731157c764ff62c5946e60ea38381f3e2ffdbb4a Mon Sep 17 00:00:00 2001
+From: Vlad Ungureanu <vvu@vdev.ro>
+Date: Thu, 7 Aug 2014 10:54:23 +0200
+Subject: [PATCH 1/2] Modified VID for SPL and U-Boot
 
 ---
  drivers/usb/gadget/ether.c |   10 +++++++++-
  1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/usb/gadget/ether.c b/drivers/usb/gadget/ether.c
-index cc6cc1f..5857ae8 100644
+index cc6cc1f..02be384 100644
 --- a/drivers/usb/gadget/ether.c
 +++ b/drivers/usb/gadget/ether.c
 @@ -96,7 +96,7 @@ static const char driver_desc[] = DRIVER_DESC;
@@ -42,10 +42,10 @@ index cc6cc1f..5857ae8 100644
 1.7.9.5
 
 
-From 66015aaf54196119e262b6bf10a400e015cde739 Mon Sep 17 00:00:00 2001
-From: Vlad Victor Ungureanu <vvu@vdev.ro>
-Date: Fri, 1 Aug 2014 17:31:18 +0200
-Subject: [PATCH 2/2] Modified the bootcmd to automate tftp downloading
+From 3954caf09865fe76930d98488bfad22d8e1abdde Mon Sep 17 00:00:00 2001
+From: Vlad Ungureanu <vvu@vdev.ro>
+Date: Thu, 7 Aug 2014 10:54:52 +0200
+Subject: [PATCH 2/2] Modified bootcmd and load addresses for FIT and dtb
 
 ---
  include/configs/am335x_evm.h      |   12 ++++++------
@@ -53,7 +53,7 @@ Subject: [PATCH 2/2] Modified the bootcmd to automate tftp downloading
  2 files changed, 12 insertions(+), 11 deletions(-)
 
 diff --git a/include/configs/am335x_evm.h b/include/configs/am335x_evm.h
-index 35ae0e6..2fcc76a 100644
+index 35ae0e6..f5b57e2 100644
 --- a/include/configs/am335x_evm.h
 +++ b/include/configs/am335x_evm.h
 @@ -20,6 +20,7 @@
@@ -74,7 +74,7 @@ index 35ae0e6..2fcc76a 100644
 -	"setenv bootpart 1:2; " \
 -	"run mmcboot;" \
 -	"run nandboot;"
-+    "setenv ethact usb_ether:" \
++    "setenv ethact usb_ether;" \
 +    "setenv serverip 192.168.1.9;" \
 +    "setenv ipaddr 192.168.1.3;" \
 +    "tftp 0x82000000 itb;" \
@@ -83,7 +83,7 @@ index 35ae0e6..2fcc76a 100644
  /* NS16550 Configuration */
  #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
 diff --git a/include/configs/ti_armv7_common.h b/include/configs/ti_armv7_common.h
-index 26ac251..04cab60 100644
+index 26ac251..44757e2 100644
 --- a/include/configs/ti_armv7_common.h
 +++ b/include/configs/ti_armv7_common.h
 @@ -54,16 +54,16 @@
@@ -102,7 +102,7 @@ index 26ac251..04cab60 100644
   * Default to a quick boot delay.
   */
 -#define CONFIG_BOOTDELAY		1
-+#define CONFIG_BOOTDELAY		2
++#define CONFIG_BOOTDELAY		0
  
  /*
   * DDR information.  If the CONFIG_NR_DRAM_BANKS is not defined,
