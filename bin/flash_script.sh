@@ -142,11 +142,11 @@ then
 			echo
 			echo "Resizing partitons now, just as a saefty measure if you flash 2GB image on 4GB board!"
 			echo -e "d\n2\nn\np\n2\n\n\nw" | sudo fdisk /dev/$bbb > /dev/null
-			sudo e2fsck -f /dev/${bbb}2
-			sudo resize2fs /dev/${bbb}2
 		fi
+		sudo e2fsck -f /dev/${bbb}2
+		sudo resize2fs /dev/${bbb}2
 		echo
-		echo "Please remove power from your board and plug it again."\
+        echo "Please remove power from your board and plug it again."\
 				"You will boot in the new OS!"
 	fi
 fi
