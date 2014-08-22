@@ -1,15 +1,14 @@
-From 543ab6bea55cfd3ee180ccdd1a030905519a78ee Mon Sep 17 00:00:00 2001
-From: Vlad Victor Ungureanu <vvu@vdev.ro>
-Date: Sat, 26 Jul 2014 21:05:10 +0200
-Subject: [PATCH 1/2] Changed default connect timeout and different VID/PID
- for SPL/U-Boot
+From 731157c764ff62c5946e60ea38381f3e2ffdbb4a Mon Sep 17 00:00:00 2001
+From: Vlad Ungureanu <vvu@vdev.ro>
+Date: Thu, 7 Aug 2014 10:54:23 +0200
+Subject: [PATCH 1/2] Modified VID for SPL and U-Boot
 
 ---
- drivers/usb/gadget/ether.c |   14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+ drivers/usb/gadget/ether.c |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/usb/gadget/ether.c b/drivers/usb/gadget/ether.c
-index cc6cc1f..63821d7 100644
+index cc6cc1f..02be384 100644
 --- a/drivers/usb/gadget/ether.c
 +++ b/drivers/usb/gadget/ether.c
 @@ -96,7 +96,7 @@ static const char driver_desc[] = DRIVER_DESC;
@@ -21,176 +20,51 @@ index cc6cc1f..63821d7 100644
  
  /*-------------------------------------------------------------------------*/
  
-@@ -241,8 +241,14 @@ static inline int BITRATE(struct usb_gadget *g)
+@@ -241,9 +241,17 @@ static inline int BITRATE(struct usb_gadget *g)
   * used with CDC Ethernet, Linux 2.4 hosts will need updates to choose
   * the non-RNDIS configuration.
   */
--#define RNDIS_VENDOR_NUM	0x0525	/* NetChip */
--#define RNDIS_PRODUCT_NUM	0xa4a2	/* Ethernet/RNDIS Gadget */
 +#ifdef CONFIG_SPL_BUILD
-+#define RNDIS_VENDOR_NUM 0x0525 /* NetChip */
-+#define RNDIS_PRODUCT_NUM 0xa4a2 /* Ethernet/RNDIS Gadget */
 +
-+#else
-+#define RNDIS_VENDOR_NUM 0x0525 /* NetChip */
-+#define RNDIS_PRODUCT_NUM 0xa4a5 /* Ethernet/RNDIS Gadget */
-+#endif 
+ #define RNDIS_VENDOR_NUM	0x0525	/* NetChip */
+ #define RNDIS_PRODUCT_NUM	0xa4a2	/* Ethernet/RNDIS Gadget */
  
++#else
++
++#define RNDIS_VENDOR_NUM    0x0525
++#define RNDIS_PRODUCT_NUM   0xa4a5
++#endif
++
  /*
   * Some systems will want different product identifers published in the
-@@ -1897,7 +1903,7 @@ static int rndis_control_ack(struct eth_device *net)
- 	*((__le32 *) (resp->buf + 4)) = __constant_cpu_to_le32(0);
- 
- 	length = usb_ep_queue(dev->status_ep, resp, GFP_ATOMIC);
--	if (length < 0) {
-+    if (length < 0) {
- 		resp->status = 0;
- 		rndis_control_ack_complete(dev->status_ep, resp);
- 	}
+  * device descriptor, either numbers or strings or both.  These string
 -- 
 1.7.9.5
 
 
-From b723187f6aedd3332caf68b11ff7e1c5a987c494 Mon Sep 17 00:00:00 2001
-From: Vlad Victor Ungureanu <vvu@vdev.ro>
-Date: Sat, 26 Jul 2014 21:06:15 +0200
-Subject: [PATCH 2/2] Changed U-Boot promt, bootcmd and load addresses. Added
- FIT support
+From 3954caf09865fe76930d98488bfad22d8e1abdde Mon Sep 17 00:00:00 2001
+From: Vlad Ungureanu <vvu@vdev.ro>
+Date: Thu, 7 Aug 2014 10:54:52 +0200
+Subject: [PATCH 2/2] Modified bootcmd and load addresses for FIT and dtb
 
 ---
- include/configs/am335x_evm.h      |   62 ++++++++++++++++++-------------------
- include/configs/ti_armv7_common.h |   11 ++++---
- 2 files changed, 36 insertions(+), 37 deletions(-)
+ include/configs/am335x_evm.h      |   12 ++++++------
+ include/configs/ti_armv7_common.h |   11 ++++++-----
+ 2 files changed, 12 insertions(+), 11 deletions(-)
 
 diff --git a/include/configs/am335x_evm.h b/include/configs/am335x_evm.h
-index a48b386..829fdb7 100644
+index 35ae0e6..f5b57e2 100644
 --- a/include/configs/am335x_evm.h
 +++ b/include/configs/am335x_evm.h
-@@ -18,21 +18,6 @@
+@@ -20,6 +20,7 @@
  
- #include <configs/ti_am335x_common.h>
- 
--#ifndef CONFIG_SPL_BUILD
--# define CONFIG_FIT
--# define CONFIG_TIMESTAMP
--# define CONFIG_LZO
--# ifdef CONFIG_ENABLE_VBOOT
--#  define CONFIG_OF_CONTROL
--#  define CONFIG_OF_SEPARATE
--#  define CONFIG_DEFAULT_DEVICE_TREE am335x-boneblack
--#  define CONFIG_FIT_SIGNATURE
--#  define CONFIG_RSA
--# endif
--#endif
--
--#define CONFIG_SYS_BOOTM_LEN		(16 << 20)
--
- #define MACH_TYPE_TIAM335EVM		3589	/* Until the next sync */
- #define CONFIG_MACH_TYPE		MACH_TYPE_TIAM335EVM
- #define CONFIG_BOARD_LATE_INIT
-@@ -53,6 +38,10 @@
- #define CONFIG_PARTITION_UUIDS
- #define CONFIG_CMD_PART
- 
-+/* new uImage format support */
-+#define CONFIG_FIT
-+#define CONFIG_FIT_VERBOSE /* enable fit_format_{error,warning}() */
-+
- #ifdef CONFIG_NAND
- #define NANDARGS \
- 	"mtdids=" MTDIDS_DEFAULT "\0" \
-@@ -78,8 +67,9 @@
- #define CONFIG_EXTRA_ENV_SETTINGS \
- 	DEFAULT_LINUX_BOOT_ENV \
- 	"boot_fdt=try\0" \
--	"bootpart=0:2\0" \
--	"bootdir=/boot\0" \
-+	"bootpart=0:1\0" \
-+	"bootdir=\0" \
-+	"fdtdir=/dtbs\0" \
- 	"bootfile=zImage\0" \
- 	"fdtfile=undefined\0" \
- 	"console=ttyO0,115200n8\0" \
-@@ -88,14 +78,14 @@
- 		"name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}\0" \
- 	"optargs=\0" \
- 	"mmcdev=0\0" \
--	"mmcroot=/dev/mmcblk0p2 ro\0" \
-+	"mmcpart=1\0" \
-+	"mmcroot=/dev/mmcblk0p2 ro fixrtc\0" \
- 	"mmcrootfstype=ext4 rootwait\0" \
- 	"rootpath=/export/rootfs\0" \
- 	"nfsopts=nolock\0" \
- 	"static_ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}" \
- 		"::off\0" \
- 	"ramroot=/dev/ram0 rw\0" \
--	"ramrootfstype=ext2\0" \
- 	"mmcargs=setenv bootargs console=${console} " \
- 		"${optargs} " \
- 		"root=${mmcroot} " \
-@@ -115,16 +105,17 @@
- 		"nfsroot=${serverip}:${rootpath},${nfsopts} rw " \
- 		"ip=dhcp\0" \
- 	"bootenv=uEnv.txt\0" \
--	"loadbootenv=load mmc ${mmcdev} ${loadaddr} ${bootenv}\0" \
-+	"loadbootenv=load mmc ${bootpart} ${loadaddr} ${bootenv}\0" \
- 	"importbootenv=echo Importing environment from mmc ...; " \
- 		"env import -t $loadaddr $filesize\0" \
- 	"ramargs=setenv bootargs console=${console} " \
- 		"${optargs} " \
- 		"root=${ramroot} " \
-+		"init=init " \
- 		"rootfstype=${ramrootfstype}\0" \
- 	"loadramdisk=load mmc ${mmcdev} ${rdaddr} ramdisk.gz\0" \
- 	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
--	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
-+	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${fdtdir}/${fdtfile}\0" \
- 	"mmcloados=run mmcargs; " \
- 		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
- 			"if run loadfdt; then " \
-@@ -141,18 +132,26 @@
- 		"fi;\0" \
- 	"mmcboot=mmc dev ${mmcdev}; " \
- 		"if mmc rescan; then " \
-+			"gpio set 54;" \
- 			"echo SD/MMC found on device ${mmcdev};" \
- 			"if run loadbootenv; then " \
-+				"gpio set 55;" \
- 				"echo Loaded environment from ${bootenv};" \
- 				"run importbootenv;" \
- 			"fi;" \
-+			"if test -n $cape; then " \
-+				"if test -e mmc ${bootpart} ${fdtdir}/$fdtbase-$cape.dtb; then " \
-+					"setenv fdtfile $fdtbase-$cape.dtb; " \
-+				"fi; " \
-+				"echo using: $fdtfile...; " \
-+			"fi; " \
-+			"echo Checking if uenvcmd is set ...;" \
- 			"if test -n $uenvcmd; then " \
-+				"gpio set 56; " \
- 				"echo Running uenvcmd ...;" \
- 				"run uenvcmd;" \
- 			"fi;" \
--			"if run loadimage; then " \
--				"run mmcloados;" \
--			"fi;" \
-+			"echo; echo uenvcmd was not defined in uEnv.txt ...;"\
- 		"fi;\0" \
- 	"spiboot=echo Booting from spi ...; " \
- 		"run spiargs; " \
-@@ -171,9 +170,9 @@
- 		"bootz ${loadaddr} ${rdaddr} ${fdtaddr}\0" \
- 	"findfdt="\
- 		"if test $board_name = A335BONE; then " \
--			"setenv fdtfile am335x-bone.dtb; fi; " \
-+			"setenv fdtfile am335x-bone.dtb; setenv fdtbase am335x-bone; fi; " \
- 		"if test $board_name = A335BNLT; then " \
--			"setenv fdtfile am335x-boneblack.dtb; fi; " \
-+			"setenv fdtfile am335x-boneblack.dtb; setenv fdtbase am335x-boneblack; fi; " \
- 		"if test $board_name = A33515BB; then " \
- 			"setenv fdtfile am335x-evm.dtb; fi; " \
- 		"if test $board_name = A335X_SK; then " \
-@@ -185,12 +184,11 @@
+ #ifndef CONFIG_SPL_BUILD
+ # define CONFIG_FIT
++# define CONFIG_FIT_VERBOSE
+ # define CONFIG_TIMESTAMP
+ # define CONFIG_LZO
+ # ifdef CONFIG_ENABLE_VBOOT
+@@ -185,12 +186,11 @@
  #endif
  
  #define CONFIG_BOOTCOMMAND \
@@ -200,16 +74,16 @@ index a48b386..829fdb7 100644
 -	"setenv bootpart 1:2; " \
 -	"run mmcboot;" \
 -	"run nandboot;"
-+	"setenv ethact usb_ether;" \
-+	"setenv serverip 192.168.1.9;" \
-+	"setenv ipaddr 192.168.1.3;" \
-+	"tftp 0x82000000 itb;" \
-+	"run ramargs; bootm"
++    "setenv ethact usb_ether;" \
++    "setenv serverip 192.168.1.9;" \
++    "setenv ipaddr 192.168.1.3;" \
++    "tftp 0x82000000 itb;" \
++    "run ramargs; bootm;"
  
  /* NS16550 Configuration */
  #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
 diff --git a/include/configs/ti_armv7_common.h b/include/configs/ti_armv7_common.h
-index 6e0bf09..1ff0468 100644
+index 26ac251..44757e2 100644
 --- a/include/configs/ti_armv7_common.h
 +++ b/include/configs/ti_armv7_common.h
 @@ -54,16 +54,16 @@
@@ -228,7 +102,7 @@ index 6e0bf09..1ff0468 100644
   * Default to a quick boot delay.
   */
 -#define CONFIG_BOOTDELAY		1
-+#define CONFIG_BOOTDELAY 2	
++#define CONFIG_BOOTDELAY		0
  
  /*
   * DDR information.  If the CONFIG_NR_DRAM_BANKS is not defined,
@@ -240,18 +114,18 @@ index 6e0bf09..1ff0468 100644
 +#define CONFIG_SYS_MALLOC_LEN		(1024 << 10)
  #define CONFIG_SYS_HUSH_PARSER
 -#define CONFIG_SYS_PROMPT		"U-Boot# "
-+#define CONFIG_SYS_PROMPT		"USB-Flash# "
++#define CONFIG_SYS_PROMPT		"USB-Flash#"
  #define CONFIG_SYS_CONSOLE_INFO_QUIET
  #define CONFIG_BAUDRATE			115200
  #define CONFIG_ENV_VARS_UBOOT_CONFIG	/* Strongly encouraged */
-@@ -174,6 +174,7 @@
- #define CONFIG_CMD_ASKENV
- #define CONFIG_CMD_ECHO
- #define CONFIG_CMD_BOOTZ
+@@ -140,6 +140,7 @@
+ #define CONFIG_AUTO_COMPLETE
+ #define CONFIG_CMDLINE_EDITING
+ #define CONFIG_VERSION_VARIABLE
 +#define CONFIG_SUPPORT_RAW_INITRD
  
- /*
-  * Common filesystems support.  When we have removable storage we
+ /* We set the max number of command args high to avoid HUSH bugs. */
+ #define CONFIG_SYS_MAXARGS		64
 -- 
 1.7.9.5
 
