@@ -67,53 +67,53 @@ After compilation you have in arch/arm/boot/ the zImage
 
 
 * ## Building the ramdisk
-    * Our initramfs will be built around BusyBox. First we create the basic folder structure.
-      ```bash
-    	mkdir initramfs
-    	mkdir -p initramfs/{bin,sbin,etc,proc,sys}
-      cd initramfs
-    	wget -O init https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/init
-    	chmod +x init
-    	```
-    * Now we need to cross-compile BusyBox for our ARM architecture
-      ```bash
-    	git clone git://git.busybox.net/busybox
-    	cd busybox
-    	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- defconfig
-    	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- menuconfig
-    	```
-    * Now here we need to compile busybox as a static binary: Busybox Settings --> Build Options --> Build Busybox as a static binary (no shared libs)  -  Enable this option by pressing "Y"
-    	```bash
-    	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j4
-    	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- install CONFIG_PREFIX=/path/to/initramfs
-    	```
-    * Now we need to install the kernel modules in our initramfs
-      ```bash
-    	cd /path/to/kernel/sources
-    	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- modules_install INSTALL_MOD_PATH=/path/to/initramfs
-    	```
+* Our initramfs will be built around BusyBox. First we create the basic folder structure.
+```bash
+mkdir initramfs
+mkdir -p initramfs/{bin,sbin,etc,proc,sys}
+cd initramfs
+wget -O init https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/init
+chmod +x init
+```
+* Now we need to cross-compile BusyBox for our ARM architecture
+```bash
+git clone git://git.busybox.net/busybox
+cd busybox
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- menuconfig
+```
+* Now here we need to compile busybox as a static binary: Busybox Settings --> Build Options --> Build Busybox as a static binary (no shared libs)  -  Enable this option by pressing "Y"
+```bash
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j4
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- install CONFIG_PREFIX=/path/to/initramfs
+```
+* Now we need to install the kernel modules in our initramfs
+```bash
+cd /path/to/kernel/sources
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- modules_install INSTALL_MOD_PATH=/path/to/initramfs
+```
 
 
 * ## Packing things up
-    * Now we need to put our initramfs in a .gz archive that the kernel knows how to process
-      ```bash
-    	mkdir maker
-    	cd /path/to/initramfs
-    	find . | cpio -H newc -o > ../initramfs.cpio
-    	cd .. && cat initramfs.cpio | gzip > initramfs.gz
-    	mv initramfs.gz /path/to/maker/folder/ramdisk.cpio.gz
-    	```
-    * Now we need to pack all things in a FIT image. In order to do so we need some additional packages installed, namely the mkimage and dtc compiler.
-      ```bash
-    	sudo apt-get update
-    	sudo apt-get install u-boot-tools device-tree-compiler
-    	cd /path/to/maker/folder
-    	wget -O maker.its https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/maker.its
-    	cp /path/to/kernel/arch/arm/boot/zImage .
-    	cp /path/to/kernel/arch/arm/boot/dts/am335x-boneblack.dtb .
-    	mkimage -f maker.its FIT
-    	```
-    * At this point we have all things put into place. You need to copy the binary blobs in the bin/ folder and run ```flash_script.sh```
+* Now we need to put our initramfs in a .gz archive that the kernel knows how to process
+```bash
+mkdir maker
+cd /path/to/initramfs
+find . | cpio -H newc -o > ../initramfs.cpio
+cd .. && cat initramfs.cpio | gzip > initramfs.gz
+mv initramfs.gz /path/to/maker/folder/ramdisk.cpio.gz
+```
+* Now we need to pack all things in a FIT image. In order to do so we need some additional packages installed, namely the mkimage and dtc compiler.
+```bash
+sudo apt-get update
+sudo apt-get install u-boot-tools device-tree-compiler
+cd /path/to/maker/folder
+wget -O maker.its https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/maker.its
+cp /path/to/kernel/arch/arm/boot/zImage .
+cp /path/to/kernel/arch/arm/boot/dts/am335x-boneblack.dtb .
+mkimage -f maker.its FIT
+```
+* At this point we have all things put into place. You need to copy the binary blobs in the bin/ folder and run ```flash_script.sh```
 
 #Contact
 vvu@vdev.ro
