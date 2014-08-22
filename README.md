@@ -50,9 +50,7 @@ The full system works as follow:
     * Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
 * ## Building the Kernel
-
 Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
-
 ```bash
 git checkout 3.14
 ./patch.sh
@@ -67,6 +65,7 @@ After compilation you have in arch/arm/boot/ the zImage
 
 
 * ## Building the ramdisk
+
 * Our initramfs will be built around BusyBox. First we create the basic folder structure.
 ```bash
 mkdir initramfs
@@ -95,6 +94,7 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- modules_install INSTALL_MOD_PATH=
 
 
 * ## Packing things up
+
 * Now we need to put our initramfs in a .gz archive that the kernel knows how to process
 ```bash
 mkdir maker
