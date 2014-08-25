@@ -24,7 +24,9 @@ Go to bin/ and execute ```flash_script.sh``` It needs the flashing image as argu
 
 For now only .xz compressed images are supported.
 
-```sudo ./flash_script.sh image.xz```
+```sudo ./flash_script.sh  [ debian | ubuntu | image.xz ]```
+
+* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-debian and ubuntu will use tarball from armhf.com website
 
 If there are bugs please feel free to contact me.
 
@@ -46,8 +48,12 @@ The full system works as follow:
     * Grab the latest U-Boot sources from [git://git.denx.de/u-boot.git](git://git.denx.de/u-boot.git)
     * Install your favourite cross-compiler, I am using arm-linux-gnueabi-
     * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
-    	* ```make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl```
-    * Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
+
+```bash
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
+```
+Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
 * ## Building the Kernel
 Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
@@ -58,7 +64,7 @@ cp configs/beaglebone kernel/arch/arm/configs/beaglebone_defconfig
 wget http://arago-project.org/git/projects/?p=am33x-cm3.git\;a=blob_plain\;f=bin/am335x-pm-firmware.bin\;hb=HEAD -O kernel/firmware/am335x-pm-firmware.bin
 cd kernel
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig -j4
-make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtb modules -j4
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtbs modules -j4
 ```
 
 After compilation you have in arch/arm/boot/ the zImage
