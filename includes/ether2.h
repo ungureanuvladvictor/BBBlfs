@@ -14,11 +14,17 @@
  *  limitations under the License.
  */
 
+#ifdef __APPLE__
+#include <netinet/if_ether.h>
+typedef struct ether_header ethhdr_t;
+#else
 #include <linux/if_ether.h>
+typedef struct ethhdr ethhdr_t;
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 
-void make_ether2(struct ethhdr *eth2, u_int8_t dstAddr[], u_int8_t srcAddr[]);
-void update_proto_ether2(struct ethhdr *eth2, uint16_t protocol);
-void debug_ether2(struct ethhdr *eth2);
+void make_ether2(ethhdr_t *eth2, u_int8_t dstAddr[], u_int8_t srcAddr[]);
+void update_proto_ether2(ethhdr_t *eth2, uint16_t protocol);
+void debug_ether2(ethhdr_t *eth2);

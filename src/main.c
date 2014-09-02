@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libusb.h>
-#include <linux/ip.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -38,12 +37,12 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     int result;
 
     ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) +
-                       sizeof(struct iphdr) + sizeof(struct ethhdr) +
+                       sizeof(iphdr_t) + sizeof(ethhdr_t) +
                        sizeof(rndis_hdr);
     ssize_t rndisSize = sizeof(rndis_hdr);
-    ssize_t etherSize = sizeof(struct ethhdr);
+    ssize_t etherSize = sizeof(ethhdr_t);
     ssize_t arpSize = sizeof(arp_hdr);
-    ssize_t ipSize = sizeof(struct iphdr);
+    ssize_t ipSize = sizeof(iphdr_t);
     ssize_t udpSize = sizeof(udp_t);
     ssize_t bootpSize = sizeof(bootp_packet);
     ssize_t tftpSize = sizeof(tftp_data);
@@ -85,18 +84,26 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     rndis_hdr *rndis = (rndis_hdr*)calloc(1, rndisSize);
     make_rndis(rndis, fullSize - rndisSize);
 
-    struct ethhdr *ether = (struct ethhdr*)(buffer+rndisSize);
-    struct ethhdr *eth2 = (struct ethhdr*)calloc(1, etherSize);
+    ethhdr_t *ether = (ethhdr_t*)(buffer+rndisSize);
+    ethhdr_t *eth2 = (ethhdr_t*)calloc(1, etherSize);
+#ifdef __APPLE__
+    make_ether2(eth2, ether->ether_shost, (unsigned char*)my_hwaddr);
+#else
     make_ether2(eth2, ether->h_source, (unsigned char*)my_hwaddr);
+#endif
 
-    struct iphdr *ip = (struct iphdr*)calloc(1, ipSize);
+    iphdr_t *ip = (iphdr_t*)calloc(1, ipSize);
     make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize + bootpSize);
 
     udp_t *udp = (udp_t*)calloc(1, udpSize);
     make_udp(udp, bootpSize, BOOTPS, BOOTPC);
 
     bootp_packet *breq = (bootp_packet*)calloc(1, bootpSize);
+#ifdef __APPLE__
+    make_bootp(servername, filename, breq, 1, ether->ether_shost);
+#else
     make_bootp(servername, filename, breq, 1, ether->h_source);
+#endif
 
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, eth2, etherSize);
@@ -118,7 +125,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     memset(data, 0, fullSize);
 
     make_rndis(rndis, etherSize + arpSize);
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHARPP);
+#else
     eth2->h_proto = htons(ETHARPP);
+#endif
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, eth2, etherSize);
     memcpy(data + rndisSize + etherSize, arpResponse, arpSize);
@@ -134,7 +145,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
     udp_t *udpSPL = (udp_t*)(buffer + rndisSize + etherSize + ipSize);
     tftp_data *tftp = (tftp_data*)calloc(1, sizeof(tftp_data));
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHIPP);
+#else
     eth2->h_proto = htons(ETHIPP);
+#endif
     int blk_number = 1;
 
     send = fopen("spl" ,"rb");
@@ -220,14 +235,24 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
                             buffer, 450, &actual, 0);
 
     make_rndis(rndis, fullSize - rndisSize);
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHIPP);
+#else
     eth2->h_proto = htons(ETHIPP);
+#endif
     make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize + bootpSize);
     make_udp(udp, bootpSize,
              ntohs(((udp_t*)(buffer + rndisSize + etherSize + ipSize))->udpDst),
              ntohs(((udp_t*)(buffer + rndisSize + etherSize + ipSize))->udpSrc));
+#ifdef __APPLE__
+    make_bootp(servername, uboot, breq,
+               ntohl(((bootp_packet*)(buffer + rndisSize + etherSize +
+                ipSize + udpSize))->xid), ether->ether_shost);
+#else
     make_bootp(servername, uboot, breq,
                ntohl(((bootp_packet*)(buffer + rndisSize + etherSize +
                 ipSize + udpSize))->xid), ether->h_source);
+#endif
 
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, eth2, etherSize);
@@ -245,7 +270,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     memset(rndis, 0, rndisSize);
 
     make_rndis(rndis, etherSize + arpSize);
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHARPP);
+#else
     eth2->h_proto = htons(ETHARPP);
+#endif
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, eth2, etherSize);
     memcpy(data +rndisSize + etherSize, arpResponse, arpSize);
@@ -257,7 +286,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
                         buffer, 450, &actual, 0);
 
     udp_t *received = (udp_t*)(buffer + rndisSize + etherSize + ipSize);
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHIPP);
+#else
     eth2->h_proto = htons(ETHIPP);
+#endif
 
     blk_number = 1;
     send = fopen("uboot", "rb");
@@ -327,7 +360,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
     memset(data, 0, fullSize);
     make_rndis(rndis, etherSize + arpSize);
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHARPP);
+#else
     eth2->h_proto = htons(ETHARPP);
+#endif
     memcpy(data, rndis, rndisSize);
     memcpy(data + rndisSize, eth2, etherSize);
     memcpy(data + rndisSize + etherSize, arpResponse, arpSize);
@@ -340,7 +377,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                             buffer, 450, &actual, 0);
 
+#ifdef __APPLE__
+    eth2->ether_type = htons(ETHIPP);
+#else
     eth2->h_proto = htons(ETHIPP);
+#endif
     blk_number = 1;
     send = fopen("fit", "rb");
 
