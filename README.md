@@ -26,7 +26,7 @@ For now only .xz compressed images are supported.
 
 ```sudo ./flash_script.sh  [ debian | ubuntu | image.xz ]```
 
-* make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-debian and ubuntu will use tarball from armhf.com website
+* debian and ubuntu will use tarball from armhf.com website
 
 If there are bugs please feel free to contact me.
 
@@ -55,8 +55,9 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
 ```
 Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
+
 * ## Building the Kernel
-Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
+    * Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
 ```bash
 git checkout 3.14
 ./patch.sh
