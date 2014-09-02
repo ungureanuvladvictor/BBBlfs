@@ -56,7 +56,7 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
 Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
 
-* ## Building the Kernel
+* <span><h2>Building the Kernel</h2></span>
     * Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
 ```bash
 git checkout 3.14
