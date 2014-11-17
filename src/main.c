@@ -47,6 +47,8 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     ssize_t bootpSize = sizeof(bootp_packet);
     ssize_t tftpSize = sizeof(tftp_data);
 
+    printf("Starting usb_flasher\n");
+
     unsigned char *data = (unsigned char*)calloc(1, 1000);
     unsigned char *buffer = (unsigned char*)malloc(450 * sizeof(unsigned char));
 
@@ -59,14 +61,16 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
     int r;
 
     r = libusb_init(&ctx);
+    printf("libusb_init returned %d\n", r);
     if(r < 0) {
         printf("Init error!\n");
         exit(1);
     }
-    libusb_set_debug(ctx, 3);
+    libusb_set_debug(ctx, 4);
 
     while (libusb_get_device_list(ctx, &devs) > 0 && 
         (dev_handle = libusb_open_device_with_vid_pid(ctx, ROMVID, ROMPID)) == NULL);
+    printf("libusb found BeagleBone Black\n");
 
     libusb_free_device_list(devs, 1);
     if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
@@ -78,8 +82,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
         exit(1);
     }
 
+    printf("Starting transfer\n");
+    libusb_clear_halt(dev_handle, (129 | LIBUSB_ENDPOINT_IN));
     r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
                                 buffer, 450, &actual, 0);
+    printf("Transfer completed: %d\n", 4);
 
     rndis_hdr *rndis = (rndis_hdr*)calloc(1, rndisSize);
     make_rndis(rndis, fullSize - rndisSize);
