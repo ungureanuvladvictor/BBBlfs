@@ -54,29 +54,34 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	FILE *send;
 
-	libusb_device **devs;
-	libusb_device_handle *dev_handle;
+	libusb_device **devs = NULL;
+	libusb_device_handle *dev_handle = NULL;
 	libusb_context *ctx = NULL;
 
 	r = libusb_init(&ctx);
-	if(r < 0) {
+	if (r < 0) {
 		printf("Init error!\n");
 		exit(1);
 	}
 	libusb_set_debug(ctx, 3);
 
-	while (libusb_get_device_list(ctx, &devs) > 0 &&
-	      (dev_handle = libusb_open_device_with_vid_pid(ctx,
-			ROMVID, ROMPID)) == NULL);
+	while (dev_handle == NULL) {
+		r = libusb_get_device_list(ctx, &devs);
+		if (r < 0) {
+			printf("Cannot get device list.\n");
+		}
+		dev_handle = libusb_open_device_with_vid_pid(ctx,
+							     ROMVID, ROMPID);
+		libusb_free_device_list(devs, 1);
+	}
 
-	libusb_free_device_list(devs, 1);
 
-	if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
+	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
 		libusb_detach_kernel_driver(dev_handle, 0);
 	}
 
 	r = libusb_claim_interface(dev_handle, 1);
-	if(r < 0) {
+	if (r < 0) {
 		printf("Cannot Claim Interface!\n");
 		exit(1);
 	}
@@ -150,7 +155,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	char *reader = (char*)malloc(512 * sizeof(char));
 
-	while(!feof(send)) {
+	while (!feof(send)) {
 		memset(reader, 0, 512);
 		memset(data, 0, fullSize);
 		memset(rndis, 0, rndisSize);
@@ -210,7 +215,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	libusb_free_device_list(devs, 1);
 
-	if(libusb_kernel_driver_active(dev_handle, 0) == 1) {
+	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
 		libusb_detach_kernel_driver(dev_handle, 0);
 	}
 
@@ -324,7 +329,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	fclose(send);
 
 	r = libusb_release_interface(dev_handle, 1);
-	if (r != 0) {
+	if (r < 0) {
 		printf("Cannot release interface!\n");
 		exit(1);
 	}
@@ -332,11 +337,16 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	sleep(3);
 
-	while (libusb_get_device_list(ctx, &devs) > 0 &&
-	      (dev_handle = libusb_open_device_with_vid_pid(ctx,
-				UBOOTVID, UBOOTPID)) == NULL);
-
-	libusb_free_device_list(devs, 1);
+	while (dev_handle == NULL) {
+		r = libusb_get_device_list(ctx, &devs);
+		if (r < 0) {
+			printf("Cannot get device list\n");
+			exit (1);
+		}
+		dev_handle = libusb_open_device_with_vid_pid(ctx,
+				UBOOTVID, UBOOTPID);
+		libusb_free_device_list(devs, 1);
+	}
 
 	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
 		libusb_detach_kernel_driver(dev_handle, 0);
