@@ -1,7 +1,11 @@
 echo
-wget -c https://releases.linaro.org/14.04/components/toolchain/binaries/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.xz
-tar xf gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.xz
-export CROSS_COMPILE=`pwd`/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux/bin/arm-linux-gnueabihf-
+if which arm-linux-gnueabihf-gcc > /dev/null; then
+  export CROSS_COMPILE=arm-linux-gnueabihf-
+else
+  wget -c https://releases.linaro.org/14.04/components/toolchain/binaries/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.xz
+  tar xf gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.xz
+  export CROSS_COMPILE=`pwd`/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux/bin/arm-linux-gnueabihf-
+fi
 echo The cross compiler is set to $CROSS_COMPILE
 echo
 
