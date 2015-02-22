@@ -3,7 +3,7 @@ BBBlfs
 
 Beagle Bone Black Linux Flash System
 
-This project provides a way to flash a BeagleBone Black via USB from a Linux machine. The project is developed during Google Summer of Code '13. 
+This project provides a way to flash a BeagleBone Black via USB from a Linux machine. The project is developed during Google Summer of Code '13.
 
 
 Build
@@ -16,7 +16,7 @@ make
 
 Usage
 -----------
-Press the S2 button on the BeagleBone Black and apply power to the board. The board should start now into USB boot mode. 
+Press the S2 button on the BeagleBone Black and apply power to the board. The board should start now into USB boot mode.
 
 Connect the board to the host PC. The kernel should now identify your board as an RNDIS interface. Be sure you do not have any BOOTP servers on your network.
 
@@ -46,6 +46,7 @@ The full system works as follow:
 
 * ## Building U-Boot for USB booting
     * Grab the latest U-Boot sources from [git://git.denx.de/u-boot.git](git://git.denx.de/u-boot.git)
+    * Checkout commit id 524123a70761110c5cf3ccc5f52f6d4da071b959
     * Install your favourite cross-compiler, I am using arm-linux-gnueabi-
     * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
 

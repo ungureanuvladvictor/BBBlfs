@@ -3,7 +3,7 @@ CFLAGS = -g -W -Wall -O2
 CFLAGS += `pkg-config --cflags libusb-1.0`
 LIBS += `pkg-config --libs libusb-1.0`
 TARGET = usb_flasher
-CROSS_COMPILE ?= arm-linux-gnueabi-
+CROSS_COMPILE ?= arm-linux-gnueabihf-
 
 SRCFOLDER = src
 INCFOLDER = includes

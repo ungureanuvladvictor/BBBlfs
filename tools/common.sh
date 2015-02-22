@@ -1,5 +1,7 @@
 echo
-export CROSS_COMPILE=$(make -s -f Makefile print_cross_cc)
+wget -c https://releases.linaro.org/14.04/components/toolchain/binaries/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.xz
+tar xf gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.xz
+export CROSS_COMPILE=`pwd`/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux/bin/arm-linux-gnueabihf-
 echo The cross compiler is set to $CROSS_COMPILE
 echo
 
@@ -37,10 +39,6 @@ function install_required_tools() {
   pkg="u-boot-tools"
   check_dpkg
   pkg="libncurses5-dev:i386"
-  check_dpkg
-  pkg="gcc-4.8-arm-linux-gnueabihf"
-  check_dpkg
-  pkg="g++-4.8-arm-linux-gnueabihf"
   check_dpkg
 
   aptget_update_install
