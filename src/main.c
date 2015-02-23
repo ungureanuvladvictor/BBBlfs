@@ -337,6 +337,8 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	sleep(3);
 
+	dev_handle = NULL;
+
 	while (dev_handle == NULL) {
 		r = libusb_get_device_list(ctx, &devs);
 		if (r < 0) {
