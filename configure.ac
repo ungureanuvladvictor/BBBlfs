@@ -1,5 +1,4 @@
 AC_INIT([bblfs], [0.1], [vvu@vdev.ro], [bblfs.tar.gz], [https://github.com/ungureanuvladvictor/BBBlfs])
-AC_PREREQ([2.69])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_CONFIG_FILES([
