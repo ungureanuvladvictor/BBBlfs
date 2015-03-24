@@ -17,6 +17,7 @@ config.status
 src/.deps/
 src/Makefile
 Makefile
+bin/.dirstamp
 
 bintest
 bin/usb_flasher
