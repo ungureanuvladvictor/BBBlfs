@@ -1,4 +1,4 @@
-BBBabb
+BBBwfs
 ======
 
-Beagle Bone Black Android Based Boot system
+BeagleBone Black Windows Flashing System
