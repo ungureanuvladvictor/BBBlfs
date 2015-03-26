@@ -25,3 +25,4 @@ obj
 *.xz
 .DS_STORE
 *.o
+gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux/
