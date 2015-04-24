@@ -1,5 +1,6 @@
 BBBlfs
 ======
+[![Build Status](https://travis-ci.org/ungureanuvladvictor/BBBlfs.svg?branch=master)](https://travis-ci.org/ungureanuvladvictor/BBBlfs)
 
 Beagle Bone Black Linux Flash System
 
