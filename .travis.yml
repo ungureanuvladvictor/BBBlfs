@@ -1,0 +1,14 @@
+sudo: required
+
+language: c
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq build-essential autoconf automake pkg-config libusb-1.0-0-dev
+
+branches:
+  only:
+    - master
+    - travis
+
+script: ./autogen.sh && ./configure && make
