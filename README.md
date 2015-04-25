@@ -48,10 +48,10 @@ The full system works as follow:
 
 
 ## Building U-Boot for USB booting
-    * Grab the latest U-Boot sources from [git://git.denx.de/u-boot.git](git://git.denx.de/u-boot.git)
-    * Checkout commit id 524123a70761110c5cf3ccc5f52f6d4da071b959
-    * Install your favourite cross-compiler, I am using arm-linux-gnueabihf-
-    * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
+* Grab the latest U-Boot sources from [git://git.denx.de/u-boot.git](git://git.denx.de/u-boot.git)
+* Checkout commit id 524123a70761110c5cf3ccc5f52f6d4da071b959
+* Install your favourite cross-compiler, I am using arm-linux-gnueabihf-
+* Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
 
 ```bash
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_defconfig
@@ -60,8 +60,8 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
 Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
 
 
-<span><h2>Building the Kernel</h2></span>
-    * Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
+## Building the Kernel
+* Grab the latest from [https://github.com/beagleboard/kernel](https://github.com/beagleboard/kernel)
 ```bash
 git checkout 3.14
 ./patch.sh
@@ -72,7 +72,7 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig -j4
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtbs modules -j4
 ```
 
-After compilation you have in arch/arm/boot/ the zImage
+* After compilation you have in arch/arm/boot/ the zImage
 
 
 ## Building the ramdisk
