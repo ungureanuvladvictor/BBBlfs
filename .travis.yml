@@ -9,6 +9,6 @@ before_install:
 branches:
   only:
     - master
-    - travis
+    - osx
 
 script: ./autogen.sh && ./configure && make
