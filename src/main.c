@@ -196,7 +196,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	fclose(send);
 	libusb_close(dev_handle);
 
-	sleep(1.5);
+	sleep(2);
 
 	libusb_get_device_list(ctx, &devs);
 	dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);
