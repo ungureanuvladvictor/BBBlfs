@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include <linux/if_ether.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>

@@ -17,10 +17,17 @@
 #ifndef ETH2_H
 #define ETH2_H
 
-#include <linux/if_ether.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+
+#define ETH_ALEN	6		/* Octets in one ethernet addr	 */
+
+struct ethhdr {
+	unsigned char	h_dest[ETH_ALEN];	/* destination eth addr	*/
+	unsigned char	h_source[ETH_ALEN];	/* source ether addr	*/
+	unsigned short	h_proto;		/* packet type ID field	*/
+} __attribute__((packed));
 
 void make_ether2(struct ethhdr *eth2, u_int8_t dstAddr[], u_int8_t srcAddr[]);
 void update_proto_ether2(struct ethhdr *eth2, uint16_t protocol);

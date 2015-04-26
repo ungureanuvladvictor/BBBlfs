@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libusb.h>
-#include <linux/ip.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
