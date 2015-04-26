@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Bbblfs by ungureanuvladvictor</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Bbblfs</h1>
+        <h2>Flash your BeagleBone Black via USB</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/ungureanuvladvictor/BBBlfs/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/ungureanuvladvictor/BBBlfs/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/ungureanuvladvictor/BBBlfs" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="bbblfs" class="anchor" href="#bbblfs" aria-hidden="true"><span class="octicon octicon-link"></span></a>BBBlfs</h1>
+
+<p><a href="https://travis-ci.org/ungureanuvladvictor/BBBlfs"><img src="https://travis-ci.org/ungureanuvladvictor/BBBlfs.svg?branch=master" alt="Build Status"></a></p>
+
+<p>Beagle Bone Black Linux Flash System</p>
+
+<p>This project provides a way to flash a BeagleBone Black via USB from a Linux machine. The project was developed during Google Summer of Code '13.</p>
+
+<h2>
+<a id="build" class="anchor" href="#build" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build</h2>
+
+<pre><code>sudo apt-get install libusb-1.0-0-dev
+./autogen.sh
+./configure
+make
+</code></pre>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Press the S2 button on the BeagleBone Black and apply power to the board. The board should start now into USB boot mode.</p>
+
+<p>Connect the board to the host PC. The kernel should now identify your board as an RNDIS interface. Be sure you do not have any BOOTP servers on your network.</p>
+
+<p>Go to bin/ and execute <code>flash_script.sh</code> It needs the flashing image as argument to be provided.</p>
+
+<p>For now only .xz compressed images are supported.</p>
+
+<p><code>sudo ./flash_script.sh  [ debian | ubuntu | image.xz ]</code></p>
+
+<ul>
+<li>debian and ubuntu will use tarball from armhf.com website</li>
+</ul>
+
+<p>If there are bugs please feel free to contact me.</p>
+
+<h2>
+<a id="how-to-build-the-binary-blobs" class="anchor" href="#how-to-build-the-binary-blobs" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to build the binary blobs</h2>
+
+<p>The full system works as follow:</p>
+
+<ul>
+<li>The AM335x ROM when in USB boot mode exposes a RNDIS interface to the PC and waits to TFTP a binary blob that it executes. That binary blob is the SPL</li>
+<li>Once the SPL runs it applies the same proceure as the ROM and TFTPs U-Boot</li>
+<li>Again U-Boot applies the same thinking and TFTPs a FIT(flatten image tree) which includes a Kernel, Ramdisk and the DTB</li>
+<li>U-Boot runs this FIT and boots the Kernel</li>
+<li>When the kernel starts the init script exports the eMMC using the g_mass_storage kernel module as an USB stick to the Linux so it can be flashed</li>
+</ul>
+
+<h2>
+<a id="building-u-boot-for-usb-booting" class="anchor" href="#building-u-boot-for-usb-booting" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building U-Boot for USB booting</h2>
+
+<ul>
+<li>Grab the latest U-Boot sources from git://git.denx.de/u-boot.git</li>
+<li>Checkout commit id 524123a70761110c5cf3ccc5f52f6d4da071b959</li>
+<li>Install your favourite cross-compiler, I am using arm-linux-gnueabihf-</li>
+<li>Apply this patch to U-Boot sources <a href="https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch">https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch</a>
+</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-</pre></div>
+
+<p>Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary</p>
+
+<h2>
+<a id="building-the-kernel" class="anchor" href="#building-the-kernel" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building the Kernel</h2>
+
+<ul>
+<li>Grab the latest from <a href="https://github.com/beagleboard/kernel">https://github.com/beagleboard/kernel</a>
+</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>git checkout 3.14
+./patch.sh
+cp configs/beaglebone kernel/arch/arm/configs/beaglebone_defconfig
+wget http://arago-project.org/git/projects/<span class="pl-k">?</span>p=am33x-cm3.git<span class="pl-cce">\;</span>a=blob_plain<span class="pl-cce">\;</span>f=bin/am335x-pm-firmware.bin<span class="pl-cce">\;</span>hb=HEAD -O kernel/firmware/am335x-pm-firmware.bin
+<span class="pl-c1">cd</span> kernel
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig -j4
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- zImage dtbs modules -j4</pre></div>
+
+<ul>
+<li>After compilation you have in arch/arm/boot/ the zImage</li>
+</ul>
+
+<h2>
+<a id="building-the-ramdisk" class="anchor" href="#building-the-ramdisk" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building the ramdisk</h2>
+
+<ul>
+<li>Our initramfs will be built around BusyBox. First we create the basic folder structure.</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>mkdir initramfs
+mkdir -p initramfs/{bin,sbin,etc,proc,sys}
+<span class="pl-c1">cd</span> initramfs
+wget -O init https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/init
+chmod +x init</pre></div>
+
+<ul>
+<li>Now we need to cross-compile BusyBox for our ARM architecture</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>git clone git://git.busybox.net/busybox
+<span class="pl-c1">cd</span> busybox
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- menuconfig</pre></div>
+
+<ul>
+<li>Now here we need to compile busybox as a static binary: Busybox Settings --&gt; Build Options --&gt; Build Busybox as a static binary (no shared libs)  -  Enable this option by pressing "Y"</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j4
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- install CONFIG_PREFIX=/path/to/initramfs</pre></div>
+
+<ul>
+<li>Now we need to install the kernel modules in our initramfs</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre><span class="pl-c1">cd</span> /path/to/kernel/sources
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- modules_install INSTALL_MOD_PATH=/path/to/initramfs</pre></div>
+
+<h2>
+<a id="packing-things-up" class="anchor" href="#packing-things-up" aria-hidden="true"><span class="octicon octicon-link"></span></a>Packing things up</h2>
+
+<ul>
+<li>Now we need to put our initramfs in a .gz archive that the kernel knows how to process</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>mkdir maker
+<span class="pl-c1">cd</span> /path/to/initramfs
+find <span class="pl-c1">.</span> <span class="pl-k">|</span> cpio -H newc -o <span class="pl-k">&gt;</span> ../initramfs.cpio
+<span class="pl-c1">cd</span> .. <span class="pl-k">&amp;&amp;</span> cat initramfs.cpio <span class="pl-k">|</span> gzip <span class="pl-k">&gt;</span> initramfs.gz
+mv initramfs.gz /path/to/maker/folder/ramdisk.cpio.gz</pre></div>
+
+<ul>
+<li>Now we need to pack all things in a FIT image. In order to do so we need some additional packages installed, namely the mkimage and dtc compiler.</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>sudo apt-get update
+sudo apt-get install u-boot-tools device-tree-compiler
+<span class="pl-c1">cd</span> /path/to/maker/folder
+wget -O maker.its https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/maker.its
+cp /path/to/kernel/arch/arm/boot/zImage <span class="pl-c1">.</span>
+cp /path/to/kernel/arch/arm/boot/dts/am335x-boneblack.dtb <span class="pl-c1">.</span>
+mkimage -f maker.its FIT</pre></div>
+
+<ul>
+<li>At this point we have all things put into place. You need to copy the binary blobs in the bin/ folder and run <code>flash_script.sh</code>
+</li>
+</ul>
+
+<h1>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact</h1>
+
+<p><a href="mailto:vvu@vdev.ro">vvu@vdev.ro</a></p>
+
+<p>vvu on #beagle, #beagle-gsoc</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
