@@ -49,7 +49,7 @@ static const char servername[6] = { 'c', 'r', 'o', 's', 's', '\0' };
 static const char filename[4] = { 'S', 'P', 'L', '\0' };
 static const char uboot[6] = { 'u', 'b', 'o', 'o', 't', '\0' };
 
-static const u_int8_t vendor[] = {
+static const uint8_t vendor[] = {
     99, 130, 83, 99,
     1, 4, 255, 255, 255, 0,
     3, 4, 192, 168, 1, 9, 0xFF
