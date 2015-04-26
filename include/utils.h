@@ -57,4 +57,5 @@ static const uint8_t vendor[] = {
 
 void hexDump (char *desc, void *addr, int len);
 const char *get_filename_ext(const char *filename);
+
 #endif
