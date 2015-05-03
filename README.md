@@ -2,15 +2,16 @@ BBBlfs
 ======
 [![Build Status](https://travis-ci.org/ungureanuvladvictor/BBBlfs.svg?branch=master)](https://travis-ci.org/ungureanuvladvictor/BBBlfs)
 
-Beagle Bone Black Linux Flash System
+BeagleBone Black OS X Flash System
 
-This project provides a way to flash a BeagleBone Black via USB from a Linux machine. The project was developed during Google Summer of Code '13.
+This project provides a way to flash a BeagleBone Black via USB from a OS X machine. The project was developed during Google Summer of Code '13.
 
 
 Build
 ----------
 ```
-sudo apt-get install libusb-1.0-0-dev
+brew install autoconf autogen automake
+brew install libusb --without-runtime-logging
 ./autogen.sh
 ./configure
 make
@@ -35,7 +36,7 @@ If there are bugs please feel free to contact me.
 
 
 
-How to build the binary blobs
+How to build the binary blobs - instructions for Linux
 --------------------------------
 
 The full system works as follow:
