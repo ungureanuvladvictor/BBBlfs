@@ -1,0 +1,129 @@
+From 45f3e1c14739317e8c8ddb2416eb41a66b738e0b Mon Sep 17 00:00:00 2001
+From: Vlad Victor Ungureanu <vvu@vdev.ro>
+Date: Sun, 3 May 2015 22:28:06 +0200
+Subject: [PATCH] Multiple changes to make it boot over USB from an OS X host.
+
+Signed-off-by: Vlad Victor Ungureanu <vvu@vdev.ro>
+---
+ drivers/usb/gadget/ether.c        |   12 ++++++++++--
+ include/configs/am335x_evm.h      |   12 ++++++------
+ include/configs/ti_armv7_common.h |   11 ++++++-----
+ 3 files changed, 22 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/usb/gadget/ether.c b/drivers/usb/gadget/ether.c
+index cc6cc1f..57ee922 100644
+--- a/drivers/usb/gadget/ether.c
++++ b/drivers/usb/gadget/ether.c
+@@ -241,9 +241,17 @@ static inline int BITRATE(struct usb_gadget *g)
+  * used with CDC Ethernet, Linux 2.4 hosts will need updates to choose
+  * the non-RNDIS configuration.
+  */
++#ifdef CONFIG_SPL_BUILD
++
+ #define RNDIS_VENDOR_NUM	0x0525	/* NetChip */
+ #define RNDIS_PRODUCT_NUM	0xa4a2	/* Ethernet/RNDIS Gadget */
+ 
++#else
++
++#define RNDIS_VENDOR_NUM    0x0525
++#define RNDIS_PRODUCT_NUM   0xa4a5
++#endif
++
+ /*
+  * Some systems will want different product identifers published in the
+  * device descriptor, either numbers or strings or both.  These string
+@@ -1884,7 +1892,6 @@ static int rndis_control_ack(struct eth_device *net)
+ 			return -ENOMEM;
+ 		resp->buf = rndis_resp_buf;
+ 	}
+-
+ 	/*
+ 	 * Send RNDIS RESPONSE_AVAILABLE notification;
+ 	 * USB_CDC_NOTIFY_RESPONSE_AVAILABLE should work too
+@@ -2385,7 +2392,8 @@ static int usb_eth_init(struct eth_device *netdev, bd_t *bd)
+ 	while (!l_ethdev.network_started) {
+ 		/* Handle control-c and timeouts */
+ 		if (ctrlc() || (get_timer(ts) > timeout)) {
+-			error("The remote end did not respond in time.");
++			//error("The remote end did not respond in time.");
++			break;
+ 			goto fail;
+ 		}
+ 		usb_gadget_handle_interrupts();
+diff --git a/include/configs/am335x_evm.h b/include/configs/am335x_evm.h
+index a48b386..3c9e54b 100644
+--- a/include/configs/am335x_evm.h
++++ b/include/configs/am335x_evm.h
+@@ -20,6 +20,7 @@
+ 
+ #ifndef CONFIG_SPL_BUILD
+ # define CONFIG_FIT
++# define CONFIG_FIT_VERBOSE
+ # define CONFIG_TIMESTAMP
+ # define CONFIG_LZO
+ # ifdef CONFIG_ENABLE_VBOOT
+@@ -185,12 +186,11 @@
+ #endif
+ 
+ #define CONFIG_BOOTCOMMAND \
+-	"run findfdt; " \
+-	"run mmcboot;" \
+-	"setenv mmcdev 1; " \
+-	"setenv bootpart 1:2; " \
+-	"run mmcboot;" \
+-	"run nandboot;"
++    "setenv ethact usb_ether;" \
++    "setenv serverip 192.168.1.9;" \
++    "setenv ipaddr 192.168.1.3;" \
++    "tftp 0x82000000 itb;" \
++    "run ramargs; bootm;"
+ 
+ /* NS16550 Configuration */
+ #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
+diff --git a/include/configs/ti_armv7_common.h b/include/configs/ti_armv7_common.h
+index 6e0bf09..9433a32 100644
+--- a/include/configs/ti_armv7_common.h
++++ b/include/configs/ti_armv7_common.h
+@@ -54,16 +54,16 @@
+ #define DEFAULT_LINUX_BOOT_ENV \
+ 	"loadaddr=0x82000000\0" \
+ 	"kernel_addr_r=0x82000000\0" \
+-	"fdtaddr=0x88000000\0" \
++	"fdtaddr=0x80F80000\0" \
+ 	"fdt_addr_r=0x88000000\0" \
+-	"rdaddr=0x88080000\0" \
++	"rdaddr=0x81000000\0" \
+ 	"ramdisk_addr_r=0x88080000\0" \
+ 	"bootm_size=0x10000000\0"
+ 
+ /*
+  * Default to a quick boot delay.
+  */
+-#define CONFIG_BOOTDELAY		1
++#define CONFIG_BOOTDELAY		0
+ 
+ /*
+  * DDR information.  If the CONFIG_NR_DRAM_BANKS is not defined,
+@@ -127,9 +127,9 @@
+  * we are on so we do not need to rely on the command prompt.  We set a
+  * console baudrate of 115200 and use the default baud rate table.
+  */
+-#define CONFIG_SYS_MALLOC_LEN		(16 << 20)
++#define CONFIG_SYS_MALLOC_LEN		(1024 << 10)
+ #define CONFIG_SYS_HUSH_PARSER
+-#define CONFIG_SYS_PROMPT		"U-Boot# "
++#define CONFIG_SYS_PROMPT		"USB-Flash#"
+ #define CONFIG_SYS_CONSOLE_INFO_QUIET
+ #define CONFIG_BAUDRATE			115200
+ #define CONFIG_ENV_VARS_UBOOT_CONFIG	/* Strongly encouraged */
+@@ -140,6 +140,7 @@
+ #define CONFIG_AUTO_COMPLETE
+ #define CONFIG_CMDLINE_EDITING
+ #define CONFIG_VERSION_VARIABLE
++#define CONFIG_SUPPORT_RAW_INITRD
+ 
+ /* We set the max number of command args high to avoid HUSH bugs. */
+ #define CONFIG_SYS_MAXARGS		64
+-- 
+1.7.9.5
+
