@@ -1,6 +1,6 @@
 BBBlfs
 ======
-[![Build Status](https://travis-ci.org/ungureanuvladvictor/BBBlfs.svg?branch=master)](https://travis-ci.org/ungureanuvladvictor/BBBlfs)
+[![Build Status](https://travis-ci.org/ungureanuvladvictor/BBBlfs.svg?branch=osx)](https://travis-ci.org/ungureanuvladvictor/BBBlfs)
 
 BeagleBone Black OS X Flash System
 
