@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>CFBundleDevelopmentRegion</key>
+        <string>en</string>
+        <key>CFBundleExecutable</key>
+        <string>$(EXECUTABLE_NAME)</string>
+        <key>CFBundleIdentifier</key>
+        <string>vdev.$(PRODUCT_NAME:rfc1034identifier)</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundleName</key>
+        <string>$(PRODUCT_NAME)</string>
+        <key>CFBundlePackageType</key>
+        <string>KEXT</string>
+        <key>CFBundleShortVersionString</key>
+        <string>1.0</string>
+        <key>CFBundleSignature</key>
+        <string>????</string>
+        <key>CFBundleVersion</key>
+        <string>1</string>
+        <key>NSHumanReadableCopyright</key>
+        <string>Copyright © 2015 vdev. All rights reserved.</string>
+        <key>OSBundleRequired</key>
+        <string>Console</string>
+        <key>IOKitPersonalities</key>
+        <dict>
+            <key>AM335x ROM</key>
+            <dict>
+                <key>CFBundleIdentifier</key>
+                <string>com.apple.kpi.iokit</string>
+                <key>IOClass</key>
+                <string>IOService</string>
+                <key>IOProbeScore</key>
+                <integer>10000</integer>
+                <key>IOProviderClass</key>
+                <string>IOUSBDevice</string>
+                <key>idProduct</key>
+                <integer>24897</integer>
+                <key>idVendor</key>
+                <integer>1105</integer>
+                <key>bcdDevice</key>
+                <integer>0</integer>
+            </dict>
+            <key>u-boot SPL</key>
+            <dict>
+                <key>CFBundleIdentifier</key>
+                <string>com.apple.kpi.iokit</string>
+                <key>IOClass</key>
+                <string>IOService</string>
+                <key>IOProbeScore</key>
+                <integer>20000</integer>
+                <key>IOProviderClass</key>
+                <string>IOUSBDevice</string>
+                <key>idProduct</key>
+                <integer>42146</integer>
+                <key>idVendor</key>
+                <integer>1317</integer>
+                <key>bcdDevice</key>
+                <integer>789</integer>
+            </dict>
+            <key>u-boot Main</key>
+            <dict>
+                <key>CFBundleIdentifier</key>
+                <string>com.apple.kpi.iokit</string>
+                <key>IOClass</key>
+                <string>IOService</string>
+                <key>IOProbeScore</key>
+                <integer>20000</integer>
+                <key>IOProviderClass</key>
+                <string>IOUSBDevice</string>
+                <key>idProduct</key>
+                <integer>42149</integer>
+                <key>idVendor</key>
+                <integer>1317</integer>
+                <key>bcdDevice</key>
+                <integer>789</integer>
+            </dict>
+        </dict>
+    </dict>
+</plist>

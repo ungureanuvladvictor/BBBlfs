@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>EC57023E-31C2-4D1C-8D42-A8D0DEB638B4</string>
+	<key>IDESourceControlProjectName</key>
+	<string>project</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>6E910EF1A220A63D015D3BF37F4B34F8BB46F461</key>
+		<string>github.com:ungureanuvladvictor/bbblfs.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>bbblfs-codeless-kext/bbblfs-codeless.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>6E910EF1A220A63D015D3BF37F4B34F8BB46F461</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:ungureanuvladvictor/bbblfs.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>6E910EF1A220A63D015D3BF37F4B34F8BB46F461</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>6E910EF1A220A63D015D3BF37F4B34F8BB46F461</string>
+			<key>IDESourceControlWCCName</key>
+			<string>bbblfs_osx</string>
+		</dict>
+	</array>
+</dict>
+</plist>
