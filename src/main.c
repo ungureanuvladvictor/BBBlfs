@@ -1,5 +1,6 @@
 #define _WINSOCKAPI_
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -39,7 +40,8 @@ int main(int argc, char **argv) {
 	unsigned char *rndis_buf = (unsigned char *)malloc(CONTROL_BUFFER_SIZE * sizeof(unsigned char));
 	rndis_init_hdr *init_msg = (rndis_init_hdr*)malloc(sizeof(rndis_init_hdr));
 	rndis_set_hdr *set_msg = (rndis_set_hdr*)malloc(sizeof(rndis_set_hdr));
-	
+	FILE *send;
+
 	r = libusb_init(&ctx);
 	if (r < 0) {
 		printf("Init error!\n");
@@ -49,7 +51,7 @@ int main(int argc, char **argv) {
 
 	printf("After you connected the BBB into USB boot mode press enter!\n");
 	r = _getch();
-
+	printf("Starting the magic!\n");
 	while (dev_handle == NULL) {
 		r = libusb_get_device_list(ctx, &devs);
 		if (r < 0) {
@@ -71,19 +73,22 @@ int main(int argc, char **argv) {
 		printf("Cannot claim bulk interface!\n");
 		exit(1);
 	}
-	
+	printf("Device opened and interface claimed!\n");
+
 	make_rndis_init_hdr(init_msg);
 	memset(rndis_buf, 0, CONTROL_BUFFER_SIZE);
 	memcpy(rndis_buf, init_msg, sizeof(rndis_init_hdr));
 	r = rndis_send_init(dev_handle, rndis_buf, sizeof(rndis_init_hdr));
+	printf("RNDIS INIT msg sent!\n");
 	make_rndis_set_hdr(set_msg);
 	memset(rndis_buf, 0, CONTROL_BUFFER_SIZE);
 	memcpy(rndis_buf, set_msg, sizeof(rndis_set_hdr) + 4);
 	*(uint32_t *)(rndis_buf + sizeof(rndis_set_hdr)) = cpu_to_le32(RNDIS_DEFAULT_FILTER);
 	r = rndis_send_filter(dev_handle, rndis_buf, sizeof(rndis_set_hdr) + 4);
+	printf("RNDIS SET FILTER ok!\n");
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
 		buffer, 450, &actual, 0);
-
+	printf("bootp request received!\n");
 	rndis_data_hdr *rndis = (rndis_data_hdr*)calloc(1, rndisSize);
 	make_rndis_data_hdr(rndis, fullSize - rndisSize);
 
@@ -109,8 +114,10 @@ int main(int argc, char **argv) {
 		breq, bootpSize);
 	r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT),
 		data, fullSize, &actual, 0);
+	printf("bootp reply sent!\n");
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
 		buffer, 450, &actual, 0);
+	printf("arp request received!\n");
 	arp_hdr *receivedArp = (arp_hdr*)(buffer + rndisSize + etherSize);
 	arp_hdr *arpResponse = (arp_hdr*)calloc(1, arpSize);
 
@@ -129,18 +136,70 @@ int main(int argc, char **argv) {
 	r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT),
 		data, rndisSize + etherSize + arpSize,
 		&actual, 0);
-
+	printf("arp reply sent!\n");
 	memset(buffer, 0, 450);
 
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
 		buffer, 450, &actual, 0);
-
+	printf("tftp request received!\n");
 	udp_t *udpSPL = (udp_t*)(buffer + rndisSize + etherSize + ipSize);
 	tftp_data *tftp = (tftp_data*)calloc(1, sizeof(tftp_data));
 	eth2->h_proto = htons(ETHIPP);
 	int blk_number = 1;
+	send = fopen("spl", "rb");
 
+	if (send == NULL) {
+		printf("Cannot open spl binary: %s %s\n", argv[0], strerror(errno));
+		_getch();
+		exit(0);
+	}
 
+	char *reader = (char*)malloc(512 * sizeof(char));
+	int result = 0;
+
+	while (!feof(send)) {
+		memset(reader, 0, 512);
+		memset(data, 0, fullSize);
+		memset(rndis, 0, rndisSize);
+		memset(ip, 0, ipSize);
+		memset(udp, 0, udpSize);
+		result = fread(reader, sizeof(char), 512, send);
+
+		make_rndis_data_hdr(rndis, etherSize + ipSize +
+			udpSize + tftpSize + result);
+		make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
+			tftpSize + result);
+		make_udp(udp, tftpSize + result, ntohs(udpSPL->udpDst),
+			ntohs(udpSPL->udpSrc));
+		make_tftp_data(tftp, 3, blk_number);
+
+		memcpy(data, rndis, rndisSize);
+		memcpy(data + rndisSize, eth2, etherSize);
+		memcpy(data + rndisSize + etherSize, ip, ipSize);
+		memcpy(data + rndisSize + etherSize + ipSize, udp, udpSize);
+		memcpy(data + rndisSize + etherSize + ipSize + udpSize,
+			tftp, tftpSize);
+		memcpy(data + rndisSize + etherSize + ipSize + udpSize +
+			tftpSize, reader, result);
+
+		r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT),
+			data, rndisSize + etherSize + ipSize +
+			udpSize + tftpSize + result,
+			&actual, 0);
+		printf("send blk %d!\n", blk_number);
+		memset(buffer, 0, 450);
+
+		r = libusb_bulk_transfer(dev_handle,
+			(129 | LIBUSB_ENDPOINT_IN), buffer,
+			450, &actual, 0);
+
+		printf("got OK for  blk %d!\n", blk_number);
+		blk_number++;
+	}
+
+	fclose(send);
+	libusb_release_interface(dev_handle, 0);
+	libusb_release_interface(dev_handle, 1);
 	libusb_close(dev_handle);
 	libusb_exit(ctx);
 
@@ -149,7 +208,7 @@ int main(int argc, char **argv) {
 	free(rndis_buf);
 	free(init_msg);
 	free(set_msg);
-
+	printf("done sending spl!\n");
 	_getch();
 	
 	return 0;
