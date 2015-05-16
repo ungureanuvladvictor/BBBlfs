@@ -13,7 +13,7 @@
 #ifndef UDP_H
 #define UDP_H
 
-#include <stdint.h>
+#include "utils.h"
 
 typedef struct udp {
 	uint16_t udpSrc; /*!< Source port of UDP packet */

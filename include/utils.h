@@ -13,6 +13,20 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <libusb.h>
+#include <inttypes.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#ifdef __linux__
+#include <arpa/inet.h>
+#endif
+
 /*Used to suppressed the unused warnings*/
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))

@@ -13,8 +13,8 @@
 #ifndef BOOTP_H
 #define BOOTP_H
 
-#include <sys/types.h>
 #include "utils.h"
+#include "config.h"
 
 typedef u_int8_t ipv4addr[4];
 

@@ -10,12 +10,6 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <linux/if_ether.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <arpa/inet.h>
-
 #include "ether2.h"
 
 void make_ether2(struct ethhdr *eth2, unsigned char *h_dest,

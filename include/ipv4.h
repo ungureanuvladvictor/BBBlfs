@@ -10,15 +10,10 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <linux/ip.h>
-#include <syslog.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <arpa/inet.h>
+#ifndef IPV4_H
+#define IPV4_h
 
-#include "udp.h"
-#include "bootp.h"
+#include "utils.h"
 
 void make_ipv4(struct iphdr *ip, const char *src_addr, const char *dst_addr,
                 uint8_t proto, uint16_t id, ssize_t total_len);

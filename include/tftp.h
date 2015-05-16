@@ -13,7 +13,9 @@
 #ifndef TFTP_H
 #define TFTP_H
 
-#include <inttypes.h>
+#include "utils.h"
+
+#define TFTP_DATA 	3
 
 typedef struct tftp {
 	uint16_t opcode;

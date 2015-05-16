@@ -10,12 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <linux/ip.h>
-#include <syslog.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <arpa/inet.h>
+#include "ipv4.h"
 
 #include "udp.h"
 #include "bootp.h"

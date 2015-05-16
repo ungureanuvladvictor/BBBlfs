@@ -13,7 +13,7 @@
 #ifndef ARP_H
 #define ARP_H
 
-#include <inttypes.h>
+#include "utils.h"
 
 typedef struct arp {
 	uint16_t htype;

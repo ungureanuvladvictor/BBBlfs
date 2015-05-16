@@ -10,14 +10,6 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <libusb.h>
-#include <linux/ip.h>
-#include <unistd.h>
-#include <sys/stat.h>
-
 #include "rndis.h"
 #include "ether2.h"
 #include "ipv4.h"

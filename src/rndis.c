@@ -10,10 +10,6 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-
 #include "rndis.h"
 
 void make_rndis(rndis_hdr *rndishdr, uint32_t data_length) {

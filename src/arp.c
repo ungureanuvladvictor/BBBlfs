@@ -10,12 +10,6 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <syslog.h>
-#include <arpa/inet.h>
-
 #include "arp.h"
 
 

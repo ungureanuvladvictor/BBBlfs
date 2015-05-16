@@ -10,14 +10,6 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <arpa/inet.h>
-#include <stdint.h>
-#include <string.h>
-#include <syslog.h>
-#include <inttypes.h>
-
 #include "udp.h"
 
 void make_udp(udp_t *udp_packet, uint16_t udp_len,
