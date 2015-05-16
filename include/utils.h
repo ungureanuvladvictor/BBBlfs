@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
 #include <arpa/inet.h>
 #endif
 
