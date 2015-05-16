@@ -11,7 +11,7 @@
  */
 
 #ifndef IPV4_H
-#define IPV4_h
+#define IPV4_H
 
 #include "utils.h"
 

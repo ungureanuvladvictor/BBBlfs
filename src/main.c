@@ -70,7 +70,7 @@ int open_and_claim_dev(libusb_device_handle **dev_handle, uint16_t vid,
 		}
 		*(dev_handle) = libusb_open_device_with_vid_pid(ctx, vid, pid);
 	}
-	if (!*(dev_handle)) {
+	if (*(dev_handle) == NULL) {
 		fprintf(stderr, "%s: cannot open device(timeout) with vid: %#x and pid: %#x!\n", __FUNCTION__, vid, pid);
 		return ret;
 	}
@@ -312,7 +312,7 @@ int main(int argc, const char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	sleep(1.5);
+	sleep(1);
 
 	r = open_and_claim_dev(&dev_handle, SPLVID, SPLPID);
 	if (r < 0) {
