@@ -22,8 +22,7 @@ typedef struct udp {
 	uint16_t chkSum; /*!< Checksum of the UDP packet */
 } udp_t;
 
-void make_udp(udp_t *udp_packet, uint16_t udp_len, 
-				uint16_t srcPort, uint16_t dstPort);
-void debug_udp(udp_t *upd_packet);
+void make_udp_packet(udp_t *udp_packet, uint16_t udp_len,
+		     uint16_t srcPort, uint16_t dstPort);
 
 #endif

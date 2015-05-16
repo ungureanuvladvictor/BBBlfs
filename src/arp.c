@@ -13,9 +13,10 @@
 #include "arp.h"
 
 
-void make_arp(arp_hdr *arp, uint16_t opcode, const uint8_t hw_source[6],
-                const uint32_t *ip_source, const uint8_t *hw_dest,
-                const uint32_t *ip_dest) {
+void make_arp_packet(arp_hdr *arp, uint16_t opcode, const uint8_t hw_source[6],
+		     const uint32_t *ip_source, const uint8_t *hw_dest,
+		     const uint32_t *ip_dest)
+{
 	arp->htype = htons(1);
 	arp->ptype = htons(0x0800);
 	arp->hlen = 6;

@@ -19,16 +19,150 @@
 #include "arp.h"
 
 #include "utils.h"
+#include "config.h"
 
-int main(int UNUSED argc, const char UNUSED * argv[]) {
+#define LIBUSB_DBG_LVL	3
+#define TIMEOUT 	10
+char *uboot_path, *spl_path, *fit_path;
+libusb_context *ctx = NULL;
+
+void set_paths()
+{
+#ifdef __linux__
+	uboot_path = "../res/linux/uboot";
+	spl_path = "../res/linux/spl";
+#endif
+
+#ifdef __APPLE__
+	uboot_path = "../res/osx/uboot";
+	spl_path = "../res/osx/spl";
+#endif
+
+	fit_path = "../res/fit";
+}
+
+int init_libusb()
+{
+	int ret = 0;
+	ret = libusb_init(&ctx);
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot init libusb!\n", __FUNCTION__);
+		return ret;
+	}
+	libusb_set_debug(ctx, LIBUSB_DBG_LVL);
+	return ret;
+}
+
+int open_and_claim_dev(libusb_device_handle **dev_handle, uint16_t vid,
+		       uint16_t pid)
+{
+	int ret = 0;
+	libusb_device **devs = NULL;
+
+	*(dev_handle) = NULL;
+
+	time_t start = time(NULL);
+	while (time(NULL) - start < TIMEOUT && *(dev_handle) == NULL) {
+		ret = libusb_get_device_list(ctx, &devs);
+		if (ret < 0) {
+			fprintf(stderr, "%s: cannot get device list!\n", __FUNCTION__);
+			return ret;
+		}
+		*(dev_handle) = libusb_open_device_with_vid_pid(ctx, vid, pid);
+	}
+	if (!*(dev_handle)) {
+		fprintf(stderr, "%s: cannot open device(timeout) with vid: %#x and pid: %#x!\n", __FUNCTION__, vid, pid);
+		return ret;
+	}
+
+#ifdef __linux__
+	if (libusb_kernel_driver_active(*(dev_handle), 0)) {
+		libusb_detach_kernel_driver(*(dev_handle), 0);
+	}
+	if (libusb_kernel_driver_active(*(dev_handle), 1)) {
+		libusb_detach_kernel_driver(*(dev_handle), 1);
+	}
+#endif
+
+	ret = libusb_claim_interface(*(dev_handle), 0);
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot claim control interface for vid: %#x and pid: %#x!\n", __FUNCTION__, vid, pid);
+		return ret;
+	}
+
+	ret = libusb_claim_interface(*(dev_handle), 1);
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot claim bulk interface for vid: %#x and pid: %#x!\n", __FUNCTION__, vid, pid);
+		return ret;
+	}
+
+	return ret;
+}
+
+int close_dev(libusb_device_handle **dev_handle)
+{
+	int ret = 0;
+
+	ret = libusb_release_interface(*(dev_handle), 0);
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot release interface 0!\n", __FUNCTION__);
+		return ret;
+	}
+
+	ret = libusb_release_interface(*(dev_handle), 1);
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot release interface 1!\n", __FUNCTION__);
+		return ret;
+	}
+
+	libusb_close(*(dev_handle));
+
+	*(dev_handle) = NULL;
+
+	return ret;
+}
+
+int init_dev(libusb_device_handle **dev_handle)
+{
+	int ret = 0;
+	unsigned char *rndis_buf = (unsigned char *)malloc(CONTROL_BUFFER_SIZE * sizeof(unsigned char));
+	rndis_init_hdr *init_msg = (rndis_init_hdr*)malloc(1 * sizeof(rndis_init_hdr *));
+	rndis_set_hdr *set_msg = (rndis_set_hdr*)malloc(1 * sizeof(rndis_set_hdr *));
+
+	make_rndis_init_hdr(init_msg);
+	memset(rndis_buf, 0, CONTROL_BUFFER_SIZE);
+	memcpy(rndis_buf, init_msg, sizeof(rndis_init_hdr));
+
+	ret = rndis_send_init(*(dev_handle), rndis_buf, sizeof(rndis_init_hdr));
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot send init RNDIS msg!\n", __FUNCTION__);
+		return ret;
+	}
+
+	make_rndis_set_hdr(set_msg);
+	memset(rndis_buf, 0, CONTROL_BUFFER_SIZE);
+	memcpy(rndis_buf, set_msg, sizeof(rndis_set_hdr) + 4);
+	*(uint32_t *)(rndis_buf + sizeof(rndis_set_hdr)) = cpu_to_le32(RNDIS_DEFAULT_FILTER);
+
+	ret = rndis_send_filter(*(dev_handle), rndis_buf, sizeof(rndis_set_hdr) + 4);
+	if (ret < 0) {
+		fprintf(stderr, "%s: cannot set RNDIS filter!\n", __FUNCTION__);
+		return ret;
+	}
+
+	return ret;
+}
+
+int main(int argc, const char **argv)
+{
 	int actual;
 	int result;
 	int r;
 
 	ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) +
 			   sizeof(struct iphdr) + sizeof(struct ethhdr) +
-			   sizeof(rndis_hdr);
-	ssize_t rndisSize = sizeof(rndis_hdr);
+			   sizeof(rndis_data_hdr);
+	ssize_t rndisSize = sizeof(rndis_data_hdr);
 	ssize_t etherSize = sizeof(struct ethhdr);
 	ssize_t arpSize = sizeof(arp_hdr);
 	ssize_t ipSize = sizeof(struct iphdr);
@@ -39,60 +173,50 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	unsigned char *data = (unsigned char*)calloc(1, 1000);
 	unsigned char *buffer = (unsigned char*)malloc(450 *
 				sizeof(unsigned char));
+	unsigned char *rndis_buf = (unsigned char *)malloc(CONTROL_BUFFER_SIZE * sizeof(unsigned char));
+	rndis_init_hdr *init_msg = (rndis_init_hdr*)malloc(1 * sizeof(rndis_init_hdr *));
+	rndis_set_hdr *set_msg = (rndis_set_hdr*)malloc(1 * sizeof(rndis_set_hdr *));
 
 	FILE *send;
 
 	libusb_device **devs = NULL;
 	libusb_device_handle *dev_handle = NULL;
-	libusb_context *ctx = NULL;
 
-	r = libusb_init(&ctx);
+	set_paths();
+
+	r = init_libusb();
+	if (r < 0)
+		exit(EXIT_FAILURE);
+
+	r = open_and_claim_dev(&dev_handle, ROMVID, ROMPID);
 	if (r < 0) {
-		printf("Init error!\n");
-		exit(1);
-	}
-	libusb_set_debug(ctx, 3);
-
-	while (dev_handle == NULL) {
-		r = libusb_get_device_list(ctx, &devs);
-		if (r < 0) {
-			printf("Cannot get device list.\n");
-		}
-		dev_handle = libusb_open_device_with_vid_pid(ctx,
-							     ROMVID, ROMPID);
-		libusb_free_device_list(devs, 1);
+		exit(EXIT_FAILURE);
 	}
 
-
-	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
-		libusb_detach_kernel_driver(dev_handle, 0);
-	}
-
-	r = libusb_claim_interface(dev_handle, 1);
+	r = init_dev(&dev_handle);
 	if (r < 0) {
-		printf("Cannot Claim Interface!\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
 				 buffer, 450, &actual, 0);
 
-	rndis_hdr *rndis = (rndis_hdr*)calloc(1, rndisSize);
-	make_rndis(rndis, fullSize - rndisSize);
+	rndis_data_hdr *rndis = (rndis_data_hdr*)calloc(1, rndisSize);
+	make_rndis_data_hdr(rndis, fullSize - rndisSize);
 
 	struct ethhdr *ether = (struct ethhdr*)(buffer+rndisSize);
 	struct ethhdr *eth2 = (struct ethhdr*)calloc(1, etherSize);
-	make_ether2(eth2, ether->h_source, (unsigned char*)my_hwaddr);
+	make_ether2_packet(eth2, ether->h_source, (unsigned char*)my_hwaddr);
 
 	struct iphdr *ip = (struct iphdr*)calloc(1, ipSize);
-	make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
+	make_ipv4_packet(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 		  bootpSize);
 
 	udp_t *udp = (udp_t*)calloc(1, udpSize);
-	make_udp(udp, bootpSize, BOOTPS, BOOTPC);
+	make_udp_packet(udp, bootpSize, htons(BOOTPS), htons(BOOTPC));
 
 	bootp_packet *breq = (bootp_packet*)calloc(1, bootpSize);
-	make_bootp(servername, filename, breq, 1, ether->h_source);
+	make_bootp_packet(servername, filename, breq, 1, ether->h_source);
 
 	memcpy(data, rndis, rndisSize);
 	memcpy(data + rndisSize, eth2, etherSize);
@@ -109,13 +233,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	arp_hdr *receivedArp = (arp_hdr*)(buffer + rndisSize + etherSize);
 	arp_hdr *arpResponse = (arp_hdr*)calloc(1, arpSize);
 
-	make_arp(arpResponse, 2, my_hwaddr, &receivedArp->ip_dest,
+	make_arp_packet(arpResponse, 2, my_hwaddr, &receivedArp->ip_dest,
 		 (const uint8_t*)&receivedArp->hw_source,
 		 &receivedArp->ip_source);
 
 	memset(data, 0, fullSize);
 
-	make_rndis(rndis, etherSize + arpSize);
+	make_rndis_data_hdr(rndis, etherSize + arpSize);
 	eth2->h_proto = htons(ETHARPP);
 	memcpy(data, rndis, rndisSize);
 	memcpy(data + rndisSize, eth2, etherSize);
@@ -135,10 +259,10 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	eth2->h_proto = htons(ETHIPP);
 	int blk_number = 1;
 
-	send = fopen("spl", "rb");
+	send = fopen(spl_path, "rb");
 
 	if (send == NULL) {
-		perror("Cannot open spl binary");
+		fprintf(stderr, "%d: cannot open spl binary!\n", __LINE__);
 	}
 
 	char *reader = (char*)malloc(512 * sizeof(char));
@@ -151,13 +275,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		memset(udp, 0, udpSize);
 		result = fread(reader, sizeof(char), 512, send);
 
-		make_rndis(rndis, etherSize + ipSize +
+		make_rndis_data_hdr(rndis, etherSize + ipSize +
 			   udpSize + tftpSize + result);
-		make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
+		make_ipv4_packet(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 			  tftpSize + result);
-		make_udp(udp, tftpSize + result, ntohs(udpSPL->udpDst),
-			 ntohs(udpSPL->udpSrc));
-		make_tftp_data(tftp, 3, blk_number);
+		make_udp_packet(udp, tftpSize + result, udpSPL->udpDst,
+			 udpSPL->udpSrc);
+		make_tftp_data(tftp, TFTP_DATA, blk_number);
 
 		memcpy(data, rndis, rndisSize);
 		memcpy(data + rndisSize, eth2, etherSize);
@@ -183,54 +307,45 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	}
 
 	fclose(send);
-	libusb_close(dev_handle);
+	r = close_dev(&dev_handle);
+	if (r < 0) {
+		exit(EXIT_FAILURE);
+	}
 
 	sleep(1.5);
 
-	libusb_get_device_list(ctx, &devs);
-	dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);
-
-	while (dev_handle == NULL) {
-		libusb_get_device_list(ctx, &devs);
-		dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID,
-							     SPLPID);
+	r = open_and_claim_dev(&dev_handle, SPLVID, SPLPID);
+	if (r < 0) {
+		exit(EXIT_FAILURE);
 	}
 
-	if (dev_handle == NULL) {
-		printf("Error! Cannot open SPL device!\n");
-		return -1;
+	r = init_dev(&dev_handle);
+	if (r < 0) {
+		exit(EXIT_FAILURE);
 	}
 
-	libusb_free_device_list(devs, 1);
+	fprintf(stdout, "SPL has started!\n");
 
-	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
-		libusb_detach_kernel_driver(dev_handle, 0);
-	}
-
-	r = libusb_claim_interface(dev_handle, 1);
-
-	printf("SPL has started!\n\n");
-
-	memset(buffer, 0, 450);
-	memset(data, 0, 1000);
-	memset(rndis, 0, rndisSize);
-	memset(eth2, 0, etherSize);
-	memset(ip, 0, ipSize);
-	memset(udp, 0, udpSize);
-	memset(breq, 0, bootpSize);
+	memset(buffer, 	0, 450);
+	memset(data, 	0, 1000);
+	memset(rndis, 	0, rndisSize);
+	memset(eth2, 	0, etherSize);
+	memset(ip, 	0, ipSize);
+	memset(udp, 	0, udpSize);
+	memset(breq, 	0, bootpSize);
 
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
 				 buffer, 450, &actual, 0);
 
-	make_rndis(rndis, fullSize - rndisSize);
+	make_rndis_data_hdr(rndis, fullSize - rndisSize);
 	eth2->h_proto = htons(ETHIPP);
-	make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize +
+	make_ipv4_packet(ip, server_ip, BBB_ip, IPUDP, 0, ipSize +
 		  udpSize + bootpSize);
-	make_udp(udp, bootpSize, ntohs(((udp_t*)(buffer + rndisSize +
-						 etherSize + ipSize))->udpDst),
-		 ntohs(((udp_t*)(buffer + rndisSize +
-				 etherSize + ipSize))->udpSrc));
-	make_bootp(servername, uboot, breq, ntohl(((bootp_packet*)(buffer +
+	make_udp_packet(udp, bootpSize, ((udp_t*)(buffer + rndisSize +
+						 etherSize + ipSize))->udpDst,
+		 ((udp_t*)(buffer + rndisSize +
+				 etherSize + ipSize))->udpSrc);
+	make_bootp_packet(servername, uboot, breq, ntohl(((bootp_packet*)(buffer +
 		   rndisSize + etherSize + ipSize + udpSize))->xid),
 		   ether->h_source);
 
@@ -250,7 +365,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	memset(data, 0 , fullSize);
 	memset(rndis, 0, rndisSize);
 
-	make_rndis(rndis, etherSize + arpSize);
+	make_rndis_data_hdr(rndis, etherSize + arpSize);
 	eth2->h_proto = htons(ETHARPP);
 	memcpy(data, rndis, rndisSize);
 	memcpy(data + rndisSize, eth2, etherSize);
@@ -267,10 +382,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	eth2->h_proto = htons(ETHIPP);
 
 	blk_number = 1;
-	send = fopen("uboot", "rb");
+	send = fopen(uboot_path, "rb");
 
 	if (send == NULL) {
-		perror("Cannot open uboot binary");
+		fprintf(stderr, "%d: cannot open uboot binary!\n", __LINE__);
+		exit(1);
 	}
 
 	memset(reader, 0, 512);
@@ -283,13 +399,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 		result = fread(reader, sizeof(char), 512, send);
 
-		make_rndis(rndis, etherSize + ipSize +
+		make_rndis_data_hdr(rndis, etherSize + ipSize +
 			   udpSize + tftpSize + result);
-		make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
+		make_ipv4_packet(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 			  tftpSize + result);
-		make_udp(udp, tftpSize + result, ntohs(received->udpDst),
-			 ntohs(received->udpSrc));
-		make_tftp_data(tftp, 3, blk_number);
+		make_udp_packet(udp, tftpSize + result, received->udpDst,
+			 received->udpSrc);
+		make_tftp_data(tftp, TFTP_DATA, blk_number);
 
 		memcpy(data, rndis, rndisSize);
 		memcpy(data + rndisSize, eth2, etherSize);
@@ -316,38 +432,27 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	fclose(send);
 
-	r = libusb_release_interface(dev_handle, 1);
+	r = close_dev(&dev_handle);
 	if (r < 0) {
-		printf("Cannot release interface!\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
-	libusb_close(dev_handle);
 
 	sleep(3);
 
-	dev_handle = NULL;
-
-	while (dev_handle == NULL) {
-		r = libusb_get_device_list(ctx, &devs);
-		if (r < 0) {
-			printf("Cannot get device list\n");
-			exit (1);
-		}
-		dev_handle = libusb_open_device_with_vid_pid(ctx,
-				UBOOTVID, UBOOTPID);
-		libusb_free_device_list(devs, 1);
+	r = open_and_claim_dev(&dev_handle, UBOOTVID, UBOOTPID);
+	if (r < 0) {
+		exit(EXIT_FAILURE);
 	}
 
-	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
-		libusb_detach_kernel_driver(dev_handle, 0);
+	r = init_dev(&dev_handle);
+	if (r < 0) {
+		exit(EXIT_FAILURE);
 	}
 
-	r = libusb_claim_interface(dev_handle, 1);
-
-	printf("U-Boot has started! Sending now the FIT image!\n\n");
+	fprintf(stdout, "U-Boot has started! Sending now the FIT image!\n");
 
 	memset(data, 0, fullSize);
-	make_rndis(rndis, etherSize + arpSize);
+	make_rndis_data_hdr(rndis, etherSize + arpSize);
 	eth2->h_proto = htons(ETHARPP);
 	memcpy(data, rndis, rndisSize);
 	memcpy(data + rndisSize, eth2, etherSize);
@@ -363,10 +468,10 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	eth2->h_proto = htons(ETHIPP);
 	blk_number = 1;
-	send = fopen("fit", "rb");
+	send = fopen(fit_path, "rb");
 
 	if (send == NULL) {
-		perror("Cannot open fit binary");
+		fprintf(stderr, "%d: cannot open fit binary!\n", __LINE__);
 		exit(1);
 	}
 
@@ -379,13 +484,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		memset(udp, 0, udpSize);
 
 		result = fread(reader, sizeof(char), 512, send);
-		make_rndis(rndis, etherSize + ipSize +
+		make_rndis_data_hdr(rndis, etherSize + ipSize +
 			   udpSize + tftpSize + result);
-		make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
+		make_ipv4_packet(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 			  tftpSize + result);
-		make_udp(udp, tftpSize + result, ntohs(received->udpDst),
-			 ntohs(received->udpSrc));
-		make_tftp_data(tftp, 3, blk_number);
+		make_udp_packet(udp, tftpSize + result, received->udpDst,
+			 received->udpSrc);
+		make_tftp_data(tftp, TFTP_DATA, blk_number);
 
 		memcpy(data, rndis, rndisSize);
 		memcpy(data + rndisSize, eth2, etherSize);
@@ -412,8 +517,10 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	fclose(send);
 
-	libusb_close(dev_handle);
-	libusb_exit(ctx);
+	r = close_dev(&dev_handle);
+	if (r < 0) {
+		exit(EXIT_FAILURE);
+	}
 
 	/* Freeing used structures */
 	free(rndis);
@@ -429,5 +536,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	free(buffer);
 	free(reader);
 
+	//TODO FIXME
+	// libusb_exit(ctx);
 	return 0;
 }

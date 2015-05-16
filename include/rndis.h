@@ -57,9 +57,33 @@ typedef struct {
 	uint32_t packet_info_len; /*!< Not used in this project*/
 	uint32_t reserved_first; /*!< Not used in this project*/
 	uint32_t reserved_second; /*!< Not used in this project*/
-} rndis_hdr;
+} rndis_data_hdr;
 
-void make_rndis(rndis_hdr *rndishdr, uint32_t data_length);
-void debug_rndis(rndis_hdr *rndis);
+typedef struct {
+	uint32_t msg_type;
+	uint32_t msg_len;
+	uint32_t request_id;
+	uint32_t major_version;
+	uint32_t minor_version;
+	uint32_t max_transfer_size;
+} rndis_init_hdr;
+
+typedef struct {
+	uint32_t msg_type;
+	uint32_t msg_len;
+	uint32_t request_id;
+	uint32_t oid;
+	uint32_t len;
+	uint32_t offset;
+	uint32_t reserved;
+} rndis_set_hdr;
+
+void make_rndis_data_hdr(rndis_data_hdr *rndis_data, uint32_t data_length);
+void make_rndis_init_hdr(rndis_init_hdr *rndis_init);
+void make_rndis_set_hdr(rndis_set_hdr *rndis_set);
+int rndis_send_init(libusb_device_handle *dev_handle, unsigned char *buf,
+		    int buflen);
+int rndis_send_filter(libusb_device_handle *dev_handle, unsigned char *buf,
+		      int buflen);
 
 #endif

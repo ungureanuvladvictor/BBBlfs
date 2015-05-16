@@ -19,6 +19,6 @@
 #include "tftp.h"
 
 void make_tftp_data(tftp_data *tftp, uint16_t opcode, uint16_t blk_number) {
-	tftp->opcode = ntohs(opcode);
-	tftp->blk_number = ntohs(blk_number);
+	tftp->opcode = htons(opcode);
+	tftp->blk_number = htons(blk_number);
 }
