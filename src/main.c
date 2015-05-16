@@ -57,21 +57,24 @@ int open_and_claim_dev(libusb_device_handle **dev_handle, uint16_t vid,
 		       uint16_t pid)
 {
 	int ret = 0;
+	ssize_t dev_count;
 	libusb_device **devs = NULL;
 
 	*(dev_handle) = NULL;
 
 	time_t start = time(NULL);
 	while (time(NULL) - start < TIMEOUT && *(dev_handle) == NULL) {
-		ret = libusb_get_device_list(ctx, &devs);
-		if (ret < 0) {
+		dev_count = libusb_get_device_list(ctx, &devs);
+		if (dev_count < 0) {
 			fprintf(stderr, "%s: cannot get device list!\n", __FUNCTION__);
+			ret = -1;
 			return ret;
 		}
 		*(dev_handle) = libusb_open_device_with_vid_pid(ctx, vid, pid);
 	}
 	if (*(dev_handle) == NULL) {
 		fprintf(stderr, "%s: cannot open device(timeout) with vid: %#x and pid: %#x!\n", __FUNCTION__, vid, pid);
+		ret = -1;
 		return ret;
 	}
 
@@ -173,13 +176,9 @@ int main(int argc, const char **argv)
 	unsigned char *data = (unsigned char*)calloc(1, 1000);
 	unsigned char *buffer = (unsigned char*)malloc(450 *
 				sizeof(unsigned char));
-	unsigned char *rndis_buf = (unsigned char *)malloc(CONTROL_BUFFER_SIZE * sizeof(unsigned char));
-	rndis_init_hdr *init_msg = (rndis_init_hdr*)malloc(1 * sizeof(rndis_init_hdr *));
-	rndis_set_hdr *set_msg = (rndis_set_hdr*)malloc(1 * sizeof(rndis_set_hdr *));
 
 	FILE *send;
 
-	libusb_device **devs = NULL;
 	libusb_device_handle *dev_handle = NULL;
 
 	set_paths();
@@ -537,6 +536,6 @@ int main(int argc, const char **argv)
 	free(reader);
 
 	//TODO FIXME
-	// libusb_exit(ctx);
+	//libusb_exit(ctx);
 	return 0;
 }
