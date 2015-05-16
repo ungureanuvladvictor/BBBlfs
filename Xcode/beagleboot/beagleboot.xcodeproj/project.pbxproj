@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E72F49141B0770E300500C7C /* arp.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F490B1B0770E300500C7C /* arp.c */; };
-		E72F49151B0770E300500C7C /* bootp.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F490C1B0770E300500C7C /* bootp.c */; };
-		E72F49161B0770E300500C7C /* ether2.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F490D1B0770E300500C7C /* ether2.c */; };
-		E72F49171B0770E300500C7C /* ipv4.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F490E1B0770E300500C7C /* ipv4.c */; };
-		E72F49181B0770E300500C7C /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F490F1B0770E300500C7C /* main.c */; };
-		E72F49191B0770E300500C7C /* rndis.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F49101B0770E300500C7C /* rndis.c */; };
-		E72F491A1B0770E300500C7C /* tftp.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F49111B0770E300500C7C /* tftp.c */; };
-		E72F491B1B0770E300500C7C /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F49121B0770E300500C7C /* udp.c */; };
-		E72F491C1B0770E300500C7C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = E72F49131B0770E300500C7C /* utils.c */; };
+		E78245251B07821B004285CB /* ether2.c in Sources */ = {isa = PBXBuildFile; fileRef = E782451C1B07821B004285CB /* ether2.c */; };
+		E78245261B07821B004285CB /* ipv4.c in Sources */ = {isa = PBXBuildFile; fileRef = E782451D1B07821B004285CB /* ipv4.c */; };
+		E78245271B07821B004285CB /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E782451E1B07821B004285CB /* main.c */; };
+		E78245281B07821B004285CB /* rndis.c in Sources */ = {isa = PBXBuildFile; fileRef = E782451F1B07821B004285CB /* rndis.c */; };
+		E78245291B07821B004285CB /* tftp.c in Sources */ = {isa = PBXBuildFile; fileRef = E78245201B07821B004285CB /* tftp.c */; };
+		E782452A1B07821B004285CB /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = E78245211B07821B004285CB /* udp.c */; };
+		E782452B1B07821B004285CB /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = E78245221B07821B004285CB /* utils.c */; };
+		E78245371B0784A4004285CB /* arp.c in Sources */ = {isa = PBXBuildFile; fileRef = E78245351B0784A4004285CB /* arp.c */; };
+		E78245381B0784A4004285CB /* bootp.c in Sources */ = {isa = PBXBuildFile; fileRef = E78245361B0784A4004285CB /* bootp.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,24 +32,24 @@
 
 /* Begin PBXFileReference section */
 		E72F49011B0770C600500C7C /* beagleboot */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = beagleboot; sourceTree = BUILT_PRODUCTS_DIR; };
-		E72F490B1B0770E300500C7C /* arp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = arp.c; path = ../../../src/arp.c; sourceTree = "<group>"; };
-		E72F490C1B0770E300500C7C /* bootp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bootp.c; path = ../../../src/bootp.c; sourceTree = "<group>"; };
-		E72F490D1B0770E300500C7C /* ether2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ether2.c; path = ../../../src/ether2.c; sourceTree = "<group>"; };
-		E72F490E1B0770E300500C7C /* ipv4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ipv4.c; path = ../../../src/ipv4.c; sourceTree = "<group>"; };
-		E72F490F1B0770E300500C7C /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../src/main.c; sourceTree = "<group>"; };
-		E72F49101B0770E300500C7C /* rndis.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rndis.c; path = ../../../src/rndis.c; sourceTree = "<group>"; };
-		E72F49111B0770E300500C7C /* tftp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tftp.c; path = ../../../src/tftp.c; sourceTree = "<group>"; };
-		E72F49121B0770E300500C7C /* udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = udp.c; path = ../../../src/udp.c; sourceTree = "<group>"; };
-		E72F49131B0770E300500C7C /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utils.c; path = ../../../src/utils.c; sourceTree = "<group>"; };
-		E72F491D1B0770EB00500C7C /* arp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = arp.h; path = ../../../include/arp.h; sourceTree = "<group>"; };
-		E72F491E1B0770EB00500C7C /* bootp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bootp.h; path = ../../../include/bootp.h; sourceTree = "<group>"; };
-		E72F491F1B0770EB00500C7C /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../../../include/config.h; sourceTree = "<group>"; };
-		E72F49201B0770EB00500C7C /* ether2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ether2.h; path = ../../../include/ether2.h; sourceTree = "<group>"; };
-		E72F49211B0770EB00500C7C /* ipv4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ipv4.h; path = ../../../include/ipv4.h; sourceTree = "<group>"; };
-		E72F49221B0770EB00500C7C /* rndis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rndis.h; path = ../../../include/rndis.h; sourceTree = "<group>"; };
-		E72F49231B0770EB00500C7C /* tftp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tftp.h; path = ../../../include/tftp.h; sourceTree = "<group>"; };
-		E72F49241B0770EB00500C7C /* udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = udp.h; path = ../../../include/udp.h; sourceTree = "<group>"; };
-		E72F49251B0770EB00500C7C /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = ../../../include/utils.h; sourceTree = "<group>"; };
+		E782451C1B07821B004285CB /* ether2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ether2.c; path = ../../src/ether2.c; sourceTree = SOURCE_ROOT; };
+		E782451D1B07821B004285CB /* ipv4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ipv4.c; path = ../../src/ipv4.c; sourceTree = SOURCE_ROOT; };
+		E782451E1B07821B004285CB /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../src/main.c; sourceTree = SOURCE_ROOT; };
+		E782451F1B07821B004285CB /* rndis.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rndis.c; path = ../../src/rndis.c; sourceTree = SOURCE_ROOT; };
+		E78245201B07821B004285CB /* tftp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tftp.c; path = ../../src/tftp.c; sourceTree = SOURCE_ROOT; };
+		E78245211B07821B004285CB /* udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = udp.c; path = ../../src/udp.c; sourceTree = SOURCE_ROOT; };
+		E78245221B07821B004285CB /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utils.c; path = ../../src/utils.c; sourceTree = SOURCE_ROOT; };
+		E782452C1B078305004285CB /* arp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = arp.h; path = ../../include/arp.h; sourceTree = SOURCE_ROOT; };
+		E782452D1B078305004285CB /* bootp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bootp.h; path = ../../include/bootp.h; sourceTree = SOURCE_ROOT; };
+		E782452E1B078305004285CB /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../../include/config.h; sourceTree = SOURCE_ROOT; };
+		E782452F1B078305004285CB /* ether2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ether2.h; path = ../../include/ether2.h; sourceTree = SOURCE_ROOT; };
+		E78245301B078305004285CB /* ipv4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ipv4.h; path = ../../include/ipv4.h; sourceTree = SOURCE_ROOT; };
+		E78245311B078305004285CB /* rndis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rndis.h; path = ../../include/rndis.h; sourceTree = SOURCE_ROOT; };
+		E78245321B078305004285CB /* tftp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tftp.h; path = ../../include/tftp.h; sourceTree = SOURCE_ROOT; };
+		E78245331B078305004285CB /* udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = udp.h; path = ../../include/udp.h; sourceTree = SOURCE_ROOT; };
+		E78245341B078305004285CB /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = ../../include/utils.h; sourceTree = SOURCE_ROOT; };
+		E78245351B0784A4004285CB /* arp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = arp.c; path = ../../src/arp.c; sourceTree = SOURCE_ROOT; };
+		E78245361B0784A4004285CB /* bootp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bootp.c; path = ../../src/bootp.c; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,24 +82,24 @@
 		E72F49031B0770C600500C7C /* beagleboot */ = {
 			isa = PBXGroup;
 			children = (
-				E72F491D1B0770EB00500C7C /* arp.h */,
-				E72F491E1B0770EB00500C7C /* bootp.h */,
-				E72F491F1B0770EB00500C7C /* config.h */,
-				E72F49201B0770EB00500C7C /* ether2.h */,
-				E72F49211B0770EB00500C7C /* ipv4.h */,
-				E72F49221B0770EB00500C7C /* rndis.h */,
-				E72F49231B0770EB00500C7C /* tftp.h */,
-				E72F49241B0770EB00500C7C /* udp.h */,
-				E72F49251B0770EB00500C7C /* utils.h */,
-				E72F490B1B0770E300500C7C /* arp.c */,
-				E72F490C1B0770E300500C7C /* bootp.c */,
-				E72F490D1B0770E300500C7C /* ether2.c */,
-				E72F490E1B0770E300500C7C /* ipv4.c */,
-				E72F490F1B0770E300500C7C /* main.c */,
-				E72F49101B0770E300500C7C /* rndis.c */,
-				E72F49111B0770E300500C7C /* tftp.c */,
-				E72F49121B0770E300500C7C /* udp.c */,
-				E72F49131B0770E300500C7C /* utils.c */,
+				E78245351B0784A4004285CB /* arp.c */,
+				E78245361B0784A4004285CB /* bootp.c */,
+				E782452C1B078305004285CB /* arp.h */,
+				E782452D1B078305004285CB /* bootp.h */,
+				E782452E1B078305004285CB /* config.h */,
+				E782452F1B078305004285CB /* ether2.h */,
+				E78245301B078305004285CB /* ipv4.h */,
+				E78245311B078305004285CB /* rndis.h */,
+				E78245321B078305004285CB /* tftp.h */,
+				E78245331B078305004285CB /* udp.h */,
+				E78245341B078305004285CB /* utils.h */,
+				E782451C1B07821B004285CB /* ether2.c */,
+				E782451D1B07821B004285CB /* ipv4.c */,
+				E782451E1B07821B004285CB /* main.c */,
+				E782451F1B07821B004285CB /* rndis.c */,
+				E78245201B07821B004285CB /* tftp.c */,
+				E78245211B07821B004285CB /* udp.c */,
+				E78245221B07821B004285CB /* utils.c */,
 			);
 			path = beagleboot;
 			sourceTree = "<group>";
@@ -160,15 +160,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E72F49191B0770E300500C7C /* rndis.c in Sources */,
-				E72F49181B0770E300500C7C /* main.c in Sources */,
-				E72F49161B0770E300500C7C /* ether2.c in Sources */,
-				E72F491C1B0770E300500C7C /* utils.c in Sources */,
-				E72F49151B0770E300500C7C /* bootp.c in Sources */,
-				E72F49171B0770E300500C7C /* ipv4.c in Sources */,
-				E72F49141B0770E300500C7C /* arp.c in Sources */,
-				E72F491A1B0770E300500C7C /* tftp.c in Sources */,
-				E72F491B1B0770E300500C7C /* udp.c in Sources */,
+				E78245381B0784A4004285CB /* bootp.c in Sources */,
+				E78245281B07821B004285CB /* rndis.c in Sources */,
+				E78245371B0784A4004285CB /* arp.c in Sources */,
+				E78245271B07821B004285CB /* main.c in Sources */,
+				E78245251B07821B004285CB /* ether2.c in Sources */,
+				E782452B1B07821B004285CB /* utils.c in Sources */,
+				E78245261B07821B004285CB /* ipv4.c in Sources */,
+				E78245291B07821B004285CB /* tftp.c in Sources */,
+				E782452A1B07821B004285CB /* udp.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,6 +303,7 @@
 				E72F490A1B0770C600500C7C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
