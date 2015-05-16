@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../beagleboot-kext/beagleboot-kext.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "self:beagleboot.xcodeproj">
    </FileRef>
 </Workspace>
