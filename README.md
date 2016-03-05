@@ -54,7 +54,7 @@ The full system works as follow:
 * Apply this patch to U-Boot sources [https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch](https://raw.githubusercontent.com/ungureanuvladvictor/BBBlfs/master/tools/USB_FLash.patch )
 
 ```bash
-make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_usbspl_config
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
 ```
 Now you have u-boot.img which is the uboot binary and spl/u-boot-spl.bin which is the spl binary
