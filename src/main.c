@@ -206,6 +206,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		libusb_get_device_list(ctx, &devs);
 		dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID,
 							     SPLPID);
+		libusb_free_device_list(devs, 1);
 	}
 
 	if (dev_handle == NULL) {
