@@ -33,10 +33,11 @@
 #include "utils.h"
 
 int main(int UNUSED argc, const char UNUSED * argv[]) {
-	int actual;
-	int result;
-	int r;
+	int actual;  //variable for actual bytes transferred
+	int result;	 //reads data stream of spl and uboot
+	int r; // 0 on success and LIB_USB error code on failure
 
+	// define size for all packets
 	ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) +
 			   sizeof(struct iphdr) + sizeof(struct ethhdr) +
 			   sizeof(rndis_hdr);
@@ -48,64 +49,73 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	ssize_t bootpSize = sizeof(bootp_packet);
 	ssize_t tftpSize = sizeof(tftp_data);
 
+	// allocate memory for buffer and data packets
 	unsigned char *data = (unsigned char*)calloc(1, 1000);
 	unsigned char *buffer = (unsigned char*)malloc(450 *
 				sizeof(unsigned char));
 
-	FILE *send;
+	FILE *send;	// file object
 
-	libusb_device **devs = NULL;
-	libusb_device_handle *dev_handle = NULL;
-	libusb_context *ctx = NULL;
+	libusb_device **devs = NULL;	//structure representing USB device
+	libusb_device_handle *dev_handle = NULL;	//structure representing handler on USB device
+	libusb_context *ctx = NULL;	//structure representing libusb session
 
-	r = libusb_init(&ctx);
-	if (r < 0) {
+	r = libusb_init(&ctx);	//Inirialize the libusb
+	if (r < 0) {			//handling faliure
 		printf("Init error!\n");
 		exit(1);
 	}
-	libusb_set_debug(ctx, 3);
+	libusb_set_debug(ctx, 3);	// Set log message verbosity	
 
-	while (dev_handle == NULL) {
-		r = libusb_get_device_list(ctx, &devs);
-		if (r < 0) {
+	while (dev_handle == NULL) {	// when no device is opened
+		r = libusb_get_device_list(ctx, &devs);	// get the usb device list
+		if (r < 0) {	//handling failure
 			printf("Cannot get device list.\n");
 		}
 		dev_handle = libusb_open_device_with_vid_pid(ctx,
-							     ROMVID, ROMPID);
-		libusb_free_device_list(devs, 1);
+							     ROMVID, ROMPID);	//opening device with rom vendor and product id
+		libusb_free_device_list(devs, 1);	// free device list as per documentation
 	}
 
 
-	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
+	if (libusb_kernel_driver_active(dev_handle, 0) == 1) { //check if kernel driver is active on interface 0
 		libusb_detach_kernel_driver(dev_handle, 0);
 	}
 
-	r = libusb_claim_interface(dev_handle, 1);
+	r = libusb_claim_interface(dev_handle, 1);	// Claim the interface of the device
 	if (r < 0) {
 		printf("Cannot Claim Interface!\n");
 		exit(1);
 	}
 
+// requesting buffer of 450 bytes from the device
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
 				 buffer, 450, &actual, 0);
 
+// RNDIS Packet header
 	rndis_hdr *rndis = (rndis_hdr*)calloc(1, rndisSize);
 	make_rndis(rndis, fullSize - rndisSize);
 
+// Ethernet packet header
 	struct ethhdr *ether = (struct ethhdr*)(buffer+rndisSize);
 	struct ethhdr *eth2 = (struct ethhdr*)calloc(1, etherSize);
 	make_ether2(eth2, ether->h_source, (unsigned char*)my_hwaddr);
 
+
+// IP packet header having ip of server, client(BBB), port number
 	struct iphdr *ip = (struct iphdr*)calloc(1, ipSize);
 	make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 		  bootpSize);
 
+// UDP packet having BOOTP implemented UDP server and client ports
 	udp_t *udp = (udp_t*)calloc(1, udpSize);
 	make_udp(udp, bootpSize, BOOTPS, BOOTPC);
 
+// BOOTP packet having server name, SPL filename, mac address of client
 	bootp_packet *breq = (bootp_packet*)calloc(1, bootpSize);
 	make_bootp(servername, filename, breq, 1, ether->h_source);
 
+// Wrapping the packets layer by layer by coping them to memory starting from data 
 	memcpy(data, rndis, rndisSize);
 	memcpy(data + rndisSize, eth2, etherSize);
 	memcpy(data + rndisSize + etherSize, ip, ipSize);
@@ -114,61 +124,72 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	       breq, bootpSize);
 
 	r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT),
-				 data, fullSize, &actual, 0);
+				 data, fullSize, &actual, 0); // BOOTP is transferred to USB device
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
-				 buffer, 450, &actual, 0);
+				 buffer, 450, &actual, 0);	// Buffer is requested again from device
 
-	arp_hdr *receivedArp = (arp_hdr*)(buffer + rndisSize + etherSize);
-	arp_hdr *arpResponse = (arp_hdr*)calloc(1, arpSize);
 
+	arp_hdr *receivedArp = (arp_hdr*)(buffer + rndisSize + etherSize); //Received ARP header
+	arp_hdr *arpResponse = (arp_hdr*)calloc(1, arpSize);	// Response ARP header
+
+// ARP response is made with data(IP address, hw address) carried by ARP request
 	make_arp(arpResponse, 2, my_hwaddr, &receivedArp->ip_dest,
 		 (const uint8_t*)&receivedArp->hw_source,
 		 &receivedArp->ip_source);
 
-	memset(data, 0, fullSize);
+	memset(data, 0, fullSize);	// Memory block starting with data is reset with 0 to carry new data
 
-	make_rndis(rndis, etherSize + arpSize);
-	eth2->h_proto = htons(ETHARPP);
+
+	make_rndis(rndis, etherSize + arpSize);		// RNDIS packet
+	eth2->h_proto = htons(ETHARPP);		// Host to Network conversion of ARP packet ID 
+	
+// Wrapping the packets for ARP response
 	memcpy(data, rndis, rndisSize);
 	memcpy(data + rndisSize, eth2, etherSize);
 	memcpy(data + rndisSize + etherSize, arpResponse, arpSize);
 
+// SEnding ARP response
 	r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT),
 				 data, rndisSize + etherSize + arpSize,
 				 &actual, 0);
 
-	memset(buffer, 0, 450);
+	memset(buffer, 0, 450);	// Emptying the buffer
 
 	r = libusb_bulk_transfer(dev_handle, (129 | LIBUSB_ENDPOINT_IN),
-				 buffer, 450, &actual, 0);
+				 buffer, 450, &actual, 0);	// Buffer is requested agin from device
 
-	udp_t *udpSPL = (udp_t*)(buffer + rndisSize + etherSize + ipSize);
-	tftp_data *tftp = (tftp_data*)calloc(1, sizeof(tftp_data));
-	eth2->h_proto = htons(ETHIPP);
-	int blk_number = 1;
+	udp_t *udpSPL = (udp_t*)(buffer + rndisSize + etherSize + ipSize);	// UDP packet
+	tftp_data *tftp = (tftp_data*)calloc(1, sizeof(tftp_data));	// TFTP packet
+	eth2->h_proto = htons(ETHIPP);	// Host to Network conversion of IP packet ID
+	
+	int blk_number = 1; // Numbering for blocks sent through TFTP
 
-	send = fopen("spl", "rb");
+	send = fopen("spl", "rb");	// Open SPL file stream in read binary mode
 
-	if (send == NULL) {
+	if (send == NULL) {		// Handling file not found
 		perror("Cannot open spl binary");
 	}
 
-	char *reader = (char*)malloc(512 * sizeof(char));
+	char *reader = (char*)malloc(512 * sizeof(char));	// Allocationg memory block to reader
 
-	while (!feof(send)) {
+	while (!feof(send)) {		// looping till end of the file
+		// Initializing memory to 0 for all packets
 		memset(reader, 0, 512);
 		memset(data, 0, fullSize);
 		memset(rndis, 0, rndisSize);
 		memset(ip, 0, ipSize);
 		memset(udp, 0, udpSize);
+
+		// 	Copy data from file in bytes to memory location pointed by reader 
 		result = fread(reader, sizeof(char), 512, send);
 
+		// Packets for all protocols
 		make_rndis(rndis, etherSize + ipSize +
 			   udpSize + tftpSize + result);
 		make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 			  tftpSize + result);
 		make_udp(udp, tftpSize + result, ntohs(udpSPL->udpDst),
-			 ntohs(udpSPL->udpSrc));
+			 ntohs(udpSPL->udpSrc));	// network to host
 		make_tftp_data(tftp, 3, blk_number);
 
 		memcpy(data, rndis, rndisSize);
