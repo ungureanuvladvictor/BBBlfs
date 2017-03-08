@@ -37,7 +37,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	int result;	 //reads data stream of spl and uboot
 	int r; // 0 on success and LIB_USB error code on failure
 
-	// define size for all packets
+	// define size for all packets blocks
 	ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) +
 			   sizeof(struct iphdr) + sizeof(struct ethhdr) +
 			   sizeof(rndis_hdr);
@@ -189,9 +189,10 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		make_ipv4(ip, server_ip, BBB_ip, IPUDP, 0, ipSize + udpSize +
 			  tftpSize + result);
 		make_udp(udp, tftpSize + result, ntohs(udpSPL->udpDst),
-			 ntohs(udpSPL->udpSrc));	// network to host
+			 ntohs(udpSPL->udpSrc));	// network to host conversion of UDP port
 		make_tftp_data(tftp, 3, blk_number);
 
+		// Protocols are wrapped around data read from SPL file stream
 		memcpy(data, rndis, rndisSize);
 		memcpy(data + rndisSize, eth2, etherSize);
 		memcpy(data + rndisSize + etherSize, ip, ipSize);
@@ -201,29 +202,49 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		memcpy(data + rndisSize + etherSize + ipSize + udpSize +
 		       tftpSize, reader, result);
 
+		// Transfer of SPL binary in TFTP blocks
 		r = libusb_bulk_transfer(dev_handle, (2 | LIBUSB_ENDPOINT_OUT),
 					 data, rndisSize + etherSize + ipSize +
 					 udpSize + tftpSize + result,
 					 &actual, 0);
 
-		memset(buffer, 0, 450);
+		memset(buffer, 0, 450);	// Clear buffer with 0
 
+		// Buffer is requested by host from device
 		r = libusb_bulk_transfer(dev_handle,
 					 (129 | LIBUSB_ENDPOINT_IN), buffer,
 					 450, &actual, 0);
 
-		blk_number++;
+		blk_number++;	// TFTP block number increment
 	}
 
-	fclose(send);
-	libusb_close(dev_handle);
+	fclose(send);	// SPL FIle closed
+
+	// release interface claimed earlier
+	r = libusb_release_interface(dev_handle, 1);
+	if (r < 0) {
+		printf("Cannot release interface!\n");
+		exit(1);
+	}
+
+	libusb_close(dev_handle);	// libusb closed to set dev_handle to NULL
 
 	sleep(1.5);
 
-	libusb_get_device_list(ctx, &devs);
-	dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);
 
-	while (dev_handle == NULL) {
+
+
+
+// Now u boot file transfer
+
+
+
+
+
+	libusb_get_device_list(ctx, &devs);	// Getting device list
+	dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);	// Finding device now by SPL vid an pid
+
+	while (dev_handle == NULL) {	// Trying to find SPL device
 		libusb_get_device_list(ctx, &devs);
 		dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID,
 							     SPLPID);
@@ -359,6 +380,16 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	sleep(3);
 
+
+
+
+
+// Now FIT binary transfer
+
+
+
+
+
 	dev_handle = NULL;
 
 	while (dev_handle == NULL) {
@@ -445,6 +476,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	}
 
 	fclose(send);
+
+	// Release interface claimed earlier
+	r = libusb_release_interface(dev_handle, 1);
+	if (r < 0) {
+		printf("Cannot release interface!\n");
+		exit(1);
+	}
 
 	libusb_close(dev_handle);
 	libusb_exit(ctx);
