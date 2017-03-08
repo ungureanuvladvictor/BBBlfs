@@ -73,7 +73,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	while (dev_handle == NULL) {	// when no device is opened
 		r = libusb_get_device_list(ctx, &devs);	// get the usb device list
 		if (r < 0) {	//handling failure
-			printf("Cannot get RNDIS device list.\n");
+			printf("Cannot get device list for RNDIS.\n");
 			exit(1);
 		}
 		dev_handle = libusb_open_device_with_vid_pid(ctx,
@@ -262,7 +262,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	while (dev_handle == NULL) {	// Trying to find SPL device
 		r = libusb_get_device_list(ctx, &devs);
 		if (r < 0) {
-			printf("Cannot get SPL device list\n");
+			printf("Cannot get device list for SPL.\n");
 			exit (1);
 		}
 		dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID,
@@ -416,7 +416,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	while (dev_handle == NULL) {
 		r = libusb_get_device_list(ctx, &devs);
 		if (r < 0) {
-			printf("Cannot get uboot device list\n");
+			printf("Cannot get device list uboot.\n");
 			exit (1);
 		}
 		dev_handle = libusb_open_device_with_vid_pid(ctx,
