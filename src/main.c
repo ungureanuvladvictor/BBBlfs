@@ -75,6 +75,8 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		dev_handle = libusb_open_device_with_vid_pid(ctx,
 							     ROMVID, ROMPID);	//opening device with rom vendor and product id
 		libusb_free_device_list(devs, 1);	// free device list as per documentation
+	
+	
 	}
 
 
@@ -255,12 +257,6 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		libusb_free_device_list(devs, 1);
 	}
 
-	if (dev_handle == NULL) {
-		printf("Error! Cannot open SPL device!\n");
-		return -1;
-	}
-
-	libusb_free_device_list(devs, 1);
 
 	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
 		libusb_detach_kernel_driver(dev_handle, 0);
