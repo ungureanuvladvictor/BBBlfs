@@ -36,6 +36,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	int actual;  //variable for actual bytes transferred
 	int result;	 //reads data stream of spl and uboot
 	int r; // 0 on success and LIB_USB error code on failure
+	int n = 100; // For handling can't open device
 
 	// define size for all packets blocks
 	ssize_t fullSize = sizeof(bootp_packet) + sizeof(udp_t) +
@@ -67,17 +68,28 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	}
 	libusb_set_debug(ctx, 3);	// Set log message verbosity	
 
+
+	int a = n;	// Variable for n times trying to open device
 	while (dev_handle == NULL) {	// when no device is opened
 		r = libusb_get_device_list(ctx, &devs);	// get the usb device list
 		if (r < 0) {	//handling failure
 			printf("Cannot get RNDIS device list.\n");
+			exit(1);
 		}
 		dev_handle = libusb_open_device_with_vid_pid(ctx,
 							     ROMVID, ROMPID);	//opening device with rom vendor and product id
 		libusb_free_device_list(devs, 1);	// free device list as per documentation
-	
+		
+		// Try n times
+		a--;
+		if(a==0){
+			printf("Can't open RNDIS device. \n");
+			exit(1);
+		 }
 	
 	}
+
+	
 
 
 	if (libusb_kernel_driver_active(dev_handle, 0) == 1) { //check if kernel driver is active on interface 0
@@ -246,6 +258,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 	libusb_get_device_list(ctx, &devs);	// Getting device list
 	dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID, SPLPID);	// Finding device now by SPL vid an pid
 
+	int b = n;	// Variable for n times trying to open device
 	while (dev_handle == NULL) {	// Trying to find SPL device
 		r = libusb_get_device_list(ctx, &devs);
 		if (r < 0) {
@@ -255,6 +268,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		dev_handle = libusb_open_device_with_vid_pid(ctx, SPLVID,
 							     SPLPID);
 		libusb_free_device_list(devs, 1);
+
+		// Try n times
+		b--;
+		if(b==0){
+			printf("Can't open SPL device. \n");
+			exit(1);
+		 }
 	}
 
 
@@ -392,6 +412,7 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 
 	dev_handle = NULL;
 
+	int c = n;	// Variable for n times trying to open device
 	while (dev_handle == NULL) {
 		r = libusb_get_device_list(ctx, &devs);
 		if (r < 0) {
@@ -401,6 +422,13 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		dev_handle = libusb_open_device_with_vid_pid(ctx,
 				UBOOTVID, UBOOTPID);
 		libusb_free_device_list(devs, 1);
+
+		// Try n times
+		c--;
+		if(c==0){
+			printf("Can't open uboot device. \n");
+			exit(1);
+		 }
 	}
 
 	if (libusb_kernel_driver_active(dev_handle, 0) == 1) {
