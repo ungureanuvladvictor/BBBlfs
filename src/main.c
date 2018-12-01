@@ -63,7 +63,11 @@ int main(int UNUSED argc, const char UNUSED * argv[]) {
 		printf("Init error!\n");
 		exit(1);
 	}
+#if LIBUSB_API_VERSION >= 0x01000106
+	libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, 3);
+#else
 	libusb_set_debug(ctx, 3);
+#endif
 
 	while (dev_handle == NULL) {
 		r = libusb_get_device_list(ctx, &devs);
